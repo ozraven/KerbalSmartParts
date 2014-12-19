@@ -104,17 +104,23 @@ v2.0.2 Updated KSPAPIExtension and Real Fuels compatbility
 	* Updated KSPAPIExtension to 1.7.0
 	* Auto stager now fully supports Real Fuels and will auto update on tank resource change
 	* No longer dependant on km_lib.dll
+v2.0.3 Updated KSPAPIExtension to add KSP 0.25 compatibility
+	* Compatibility update for KSP 0.25
+	* Updated KSPAPIExtension to 1.7.1
+v2.0.4 Updated KSPAPIExtension to add KSP 0.90 compatibility and bug fixes
+	* Compatibility update for KSP 0.90
+	* Updated KSPAPIExtension to 1.7.2
+	* Hopefully fixed bug affecting timer firing upon save load or scene change
 
 	 
 	 
 Credits and Acknowledgments
 ------------------------------
-Thanks to Duxwing for copy-editing SSE's and SmartParts front page and README.
+Thanks to swamp_ig and NathanKell for the KSPAPIExtension used in SmartParts
 	 
 License	 
 -----------------------------
-This work is shared under Creative Commons CC BY-NC-ND 3.0 license.
-You may use it for non commercial as long as you do not change or extend it (share as is) and as long as you give credit to the author in the download and on the download page.
-Please contact me if you wish to modify or extend the code.
+This work is shared under Creative Commons CC BY-NC-SA 3.0 license.
+
 Author: dtobi and Firov
 ------------------------------

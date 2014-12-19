@@ -97,6 +97,9 @@ namespace KM_Lib
         [KSPField(isPersistant = true)]
         private Boolean useSeconds = true;
 
+        [KSPField(isPersistant = true)]
+        private Boolean armed = true;
+
         #endregion
 
 
@@ -151,7 +154,6 @@ namespace KM_Lib
 
         #region Variables
 
-        private Boolean armed = true;
         private int previousStage = 0;
 
         #endregion
@@ -165,6 +167,11 @@ namespace KM_Lib
                 this.part.OnEditorDetach += OnEditorDetach;
                 this.part.OnEditorDestroy += OnEditorDestroy;
                 OnEditorAttach();
+            }
+            if(!armed){
+                Utility.switchLight(this.part, "light-go", true);
+                Utility.playAnimationSetToPosition(this.part, "glow", 1);
+                this.part.stackIcon.SetIconColor(XKCDColors.Red);
             }
             if (allowStage) {
                 Events["activateStaging"].guiActiveEditor = false;
@@ -181,14 +188,14 @@ namespace KM_Lib
 
         public override void OnActive() {
             //If staging enabled, set timer
-            if (allowStage) {
+            if (allowStage && armed) {
                 setTimer();
             }
         }
 
         public override void OnUpdate() {
             //Check to see if the timer has been dragged in the staging list. If so, reset icon color
-            if (this.part.inverseStage != previousStage && allowStage && !armed && this.part.inverseStage < Staging.CurrentStage) {
+            if (this.part.inverseStage != previousStage && allowStage && !armed && this.part.inverseStage + 1 < Staging.CurrentStage) {
                 reset();
             }
             previousStage = this.part.inverseStage;
@@ -253,6 +260,7 @@ namespace KM_Lib
         }
 
         private void reset() {
+            print("Timer reset");
             //Reset trigger and remaining time to 0
             triggerTime = 0;
             remainingTime = 0;
@@ -263,6 +271,8 @@ namespace KM_Lib
             this.part.stackIcon.SetIconColor(XKCDColors.White);
             //Reset armed variable
             armed = true;
+            //Reset activation status on part
+            this.part.deactivate();
         }
 
         private void updateButtons() {

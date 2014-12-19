@@ -248,8 +248,8 @@ namespace KM_Lib
 
             this.vessel.ActionGroups.SetGroup(KSPActionGroup.SAS, true);
             print("Listener:" + vessel.vesselName + "received command" + group);
-            this.vessel.vesselSAS.LockHeading(targetUp, true);
-            this.vessel.vesselSAS.Update();
+            this.vessel.Autopilot.SAS.LockHeading(targetUp, true);
+            this.vessel.Autopilot.SAS.Update();
             indicateReceive(playSound);
         }
 
