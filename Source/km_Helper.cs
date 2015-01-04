@@ -57,8 +57,7 @@ namespace KM_Lib
 
         #region Staging/AG Methods
 
-        public static void fireEvent(Part p, int eventID, int AGXgroup) { //AGXgroup is only used if Action Groups Extended is installed, ignore it otherwise
-            Debug.Log("fire " + p.name + eventID + "||" + AGXgroup);
+        public static void fireEvent(Part p, int eventID, int AGXgroup) { //AGXgroup is only used if Action Groups Extended is installed, ignore it otherwiseDebug.Log("fire " + p.name + eventID + "||" + AGXgroup);
             if (p == null)
                 return;
             if (eventID == 0) {
