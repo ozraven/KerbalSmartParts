@@ -75,6 +75,35 @@ namespace KM_Lib
         )]
         public string group = "0";
 
+        //AGXGroup shows if AGX installed and hides Group above
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false, guiName = "Group"),
+            UI_ChooseOption(
+            options = new String[] {
+                "0",
+                "1",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15"
+            },
+            display = new String[] {
+                "Stage",
+                "Action Group:",
+                "Lights",
+                "RCS",
+                "SAS",
+                "Brakes",
+                "Abort"
+            }
+        )]
+        public string agxGroupType = "0";
+
+        // AGX Action groups, use own slider if selected, only show this field if AGXGroup above is 1
+        [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Group:", guiFormat = "N0"),
+            UI_FloatEdit(scene = UI_Scene.All, minValue = 1f, maxValue = 250f, incrementLarge = 75f, incrementSmall = 25f, incrementSlide = 1f)]
+        public float agxGroupNum = 1;
+
         [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Meters", guiFormat = "F0", guiUnits = "m"),
             UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 1000f, incrementLarge = 200f, incrementSmall = 25f, incrementSlide = 1f)]
         public float meterHeight = 0;
@@ -135,6 +164,7 @@ namespace KM_Lib
         private Boolean illuminated = false;
         private Boolean ascending = false;
         private Boolean fireNextupdate = false;
+        private string groupLastUpdate = "0"; //AGX: What was our selected group last update frame? Top slider.
 
         #endregion
 
@@ -153,6 +183,7 @@ namespace KM_Lib
             //Force activation no matter which stage it's on
             this.part.force_activate();
             print("KM Altimeter Detector Started");
+            updateButtons();
         }
 
         public override void OnUpdate() {
@@ -162,7 +193,16 @@ namespace KM_Lib
             }
             //In order for physics to take effect on jettisoned parts, the staging event has to be fired from OnUpdate
             if (fireNextupdate) {
-                km_Helper.fireEvent(this.part, int.Parse(group));
+                int groupToFire = 0; //AGX: need to send correct group
+                if (AGXInterface.AGExtInstalled())
+                {
+                    groupToFire = int.Parse(agxGroupType);
+                }
+                else
+                {
+                    groupToFire = int.Parse(group);
+                }
+                km_Helper.fireEvent(this.part, groupToFire,(int)agxGroupNum); 
                 fireNextupdate = false;
             }
         }
@@ -197,6 +237,32 @@ namespace KM_Lib
                 else if (!ascending && Math.Abs((alt + currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) > currentWindow) {
                     isArmed = true;
                 }
+            }
+        }
+        public void Update() //AGX: The OnUpdate above only seems to run in flight mode, Update() here runs in all scenes
+        {
+            if (agxGroupType == "1" & groupLastUpdate != "1" || agxGroupType != "1" & groupLastUpdate == "1") //AGX: Monitor group to see if we need to refresh window
+            {
+                updateButtons();
+                refreshPartWindow();
+                if (agxGroupType == "1")
+                {
+                    groupLastUpdate = "1";
+                }
+                else
+                {
+                    groupLastUpdate = "0";
+                }
+            }
+        }
+
+        private void refreshPartWindow() //AGX: Refresh right-click part window to show/hide Groups slider
+        {
+            UIPartActionWindow[] partWins = FindObjectsOfType<UIPartActionWindow>();
+            //print("Wind count " + partWins.Count());
+            foreach (UIPartActionWindow partWin in partWins)
+            {
+                partWin.displayDirty = true;
             }
         }
 
@@ -266,6 +332,39 @@ namespace KM_Lib
                 Fields["kilometerHeight"].guiActive = false;
                 //Reset kilometer scale
                 kilometerHeight = 0;
+            }
+
+            //Change to AGX buttons if AGX installed
+            if (AGXInterface.AGExtInstalled())
+            {
+                Fields["group"].guiActiveEditor = false;
+                Fields["group"].guiActive = false;
+                Fields["agxGroupType"].guiActiveEditor = true;
+                Fields["agxGroupType"].guiActive = true;
+                //Fields["agxGroupNum"].guiActiveEditor = true;
+                //Fields["agxGroupNum"].guiActive = true;
+                if (agxGroupType == "1") //only show groups select slider when selecting action group
+                {
+                    Fields["agxGroupNum"].guiActiveEditor = true;
+                    Fields["agxGroupNum"].guiActive = true;
+                    //Fields["agxGroupNum"].guiName = "Group:";
+                }
+                else
+                {
+                    Fields["agxGroupNum"].guiActiveEditor = false;
+                    Fields["agxGroupNum"].guiActive = false;
+                    //Fields["agxGroupNum"].guiName = "N/A";
+                    //agxGroupNum = 1;
+                }
+            }
+            else //AGX not installed, leave at default
+            {
+                Fields["group"].guiActiveEditor = true;
+                Fields["group"].guiActive = true;
+                Fields["agxGroupType"].guiActiveEditor = false;
+                Fields["agxGroupType"].guiActive = false;
+                Fields["agxGroupNum"].guiActiveEditor = false;
+                Fields["agxGroupNum"].guiActive = false;
             }
         }
 

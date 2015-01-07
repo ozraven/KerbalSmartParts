@@ -57,13 +57,17 @@ namespace KM_Lib
 
         #region Staging/AG Methods
 
-        public static void fireEvent(Part p, int eventID) {
+        public static void fireEvent(Part p, int eventID, int AGXgroup) { //AGXgroup is only used if Action Groups Extended is installed, ignore it otherwiseDebug.Log("fire " + p.name + eventID + "||" + AGXgroup);
             if (p == null)
                 return;
             if (eventID == 0) {
                 MonoBehaviour.print("Fire Stage from part " + p);
                 fireNextNonEmptyStage(p.vessel);
                 return;
+            }
+            else if(AGXInterface.AGExtInstalled() && eventID == 1) 
+            {
+                AGXInterface.AGX2VslToggleGroup(p.vessel.rootPart.flightID, AGXgroup); //call to agx to activate group
             }
             else if (eventID > 0 && eventID <= maxEvent) {
                 MonoBehaviour.print("Fire Event " + KM_dictAGNames[eventID] + " from part " + p);
