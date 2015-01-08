@@ -53,27 +53,27 @@ Drains excess fuel. It can drain LF, LFO and RCS. Attach it to the tank of a res
 
 Changelog:
 
-V0.1 Initial release
-V0.2 Trigger improvements
+v0.1.0 Initial release
+v0.2.0 Trigger improvements
 	* Heading control over radio
-	* Improved altimeter device (thanks to Firov)
+	* Improved altimeter device (Thanks to Firov)
 	* Bugfix in the timer code
 	* Fixed overly long part names
 	* Added example craft
 	* Corrected size descriptions of fuel breakers
-V0.3 Smart Parts Update and New Example Craft
+v1.0.0 Smart Parts Update and New Example Craft
 	* Added example craft for smart parts
 	* Minor fixes for smart parts
 	* Optimized altimeter scale
 	* Made fuel detector more robust against remaining fuel in empty tanks
 	* New KM_Lib.dll
-V0.3 Fuel Valve and Detail Improvements
+v1.1.0 Fuel Valve and Detail Improvements
 	* Activation and deactivation action group commands for altimeter and fuel detector
 	* Beep command to beep when a condition occurs
 	* Fuel valve to drain excess fuel
 	* Staging for the timer
 	* Improved fuel drain detection (should not fire prematurely)
-V0.4 Improved fuel sensor, valve and altimeter
+v1.2.0 Improved fuel sensor, valve and altimeter
 	* The stager now works with any resource (including electric charge and custom resources)
 	* The valve now works with any resource (excluding electric charge). Other resources (e.g., real fuels should work, too.)
 	* Removed double word in descriptions
@@ -81,12 +81,12 @@ V0.4 Improved fuel sensor, valve and altimeter
 	* Altimeter altitude detection logic tweaked. Now works over water and buildings!
 	* Altimeter no longer requires specifiying if it fires "above" or "below"
 	* Altimeter now supports automatic reset as a result of above change
-V0.5 Improved parts and bugfixes
+v1.3.0 Improved parts and bugfixes
 	* Fixed bug that resulted in a lack of physics on parts ejected by altimeter
 	* Fixed bug that created an empty stage whenever staging was activated by a SmartPart
 	* Fuel valve now generates minimal amount of thrust and can be staged
 	* Timer timescales adjusted. Added 0-30 seconds in .2 second increments and .5 to 60 minutes in .5 minute increments
-v0.6 Upgraded GUI, Improved parts, and KSP .24 compatibility
+v1.4.0 Upgraded GUI, Improved parts, and KSP .24 compatibility
 	* Compatibility with KSP .24
 	* Implemented new GUI to allow more control of Smart Parts
 	* Improved Stager
@@ -96,31 +96,39 @@ v0.6 Upgraded GUI, Improved parts, and KSP .24 compatibility
 	* Improved Fuel Controller
 		* Crossfeed tweakable now accessible in VAB/SPH
 		* Removed redundant fuel controller ("ON")
-v0.6.1 KSP .24.1 compatibility
+v1.4.1 KSP .24.1 compatibility
 	* KSP .24.1 compatibility
-v0.6.2 KSP .24.2 compatibility
+v1.4.2 KSP .24.2 compatibility
 	* KSP .24.2 compatibility
-v2.0.2 Updated KSPAPIExtension and Real Fuels compatbility
+v1.4.3 Updated KSPAPIExtension and Real Fuels compatbility
 	* Updated KSPAPIExtension to 1.7.0
 	* Auto stager now fully supports Real Fuels and will auto update on tank resource change
 	* No longer dependant on km_lib.dll
-v2.0.3 Updated KSPAPIExtension to add KSP 0.25 compatibility
+v1.4.4 Updated KSPAPIExtension to add KSP 0.25 compatibility
 	* Compatibility update for KSP 0.25
 	* Updated KSPAPIExtension to 1.7.1
-v2.0.4 Updated KSPAPIExtension to add KSP 0.90 compatibility and bug fixes
+v1.4.5 Updated KSPAPIExtension to add KSP 0.90 compatibility and bug fixes
 	* Compatibility update for KSP 0.90
 	* Updated KSPAPIExtension to 1.7.2
 	* Hopefully fixed bug affecting timer firing upon save load or scene change
+v1.5.0 Added support for Action Groups Extended
+	* Added full support for Action Groups Extended (Thanks to Diazo)
+v1.5.1 Added support for KSP-AVC and changed "brand"
+	* Added support for KSP-AVC
+	* Changed "brand" from Klockheed Martian to prevent mod incompatibilities
+		* Please delete old Smart Parts folder before installing v1.5.1
 
 	 
 	 
 Credits and Acknowledgments
 ------------------------------
 Thanks to swamp_ig and NathanKell for the KSPAPIExtension used in SmartParts
+Thanks to cybutek for the KSP Add-on Version Checker used in SmartParts
 	 
 License	 
 -----------------------------
-This work is shared under Creative Commons CC BY-NC-SA 3.0 license.
+This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 United States License. 
+To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/us/
 
 Author: dtobi and Firov
 ------------------------------
