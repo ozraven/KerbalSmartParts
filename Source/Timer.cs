@@ -218,7 +218,7 @@ namespace Lib
 
             //If the timer has been activated, start the countdown, activate the model's LED, and change the icon color
             if (triggerTime > 0 && armed) {
-                remainingTime = triggerTime + (useSeconds ? triggerDelaySeconds : triggerDelayMinutes * 60) - Time.time;
+                remainingTime = triggerTime + (useSeconds ? triggerDelaySeconds : triggerDelayMinutes * 60) - Planetarium.GetUniversalTime();
                 Utility.switchLight(this.part, "light-go", true);
                 Utility.playAnimationSetToPosition(this.part, "glow", 1);
                 this.part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
@@ -296,7 +296,7 @@ namespace Lib
         private void setTimer() {
             if (armed) {
                 //Set the trigger time, which will be caught in OnUpdate
-                triggerTime = Time.fixedTime;
+                triggerTime = Planetarium.GetUniversalTime();
                 print("Activating Timer: " + (useSeconds ? triggerDelaySeconds : triggerDelayMinutes * 60));
             }
         }
