@@ -90,6 +90,7 @@ namespace Lib
 
         private Part observedPart = null;
         private string groupLastUpdate = "0"; //AGX: What was our selected group last update frame? Top slider.
+        private double lastFill = 0; // save the last fill level when the tank drains
 
         #endregion
 
@@ -123,20 +124,16 @@ namespace Lib
         public override void OnUpdate() {
             if (isActive && observedPart != null && monitoredResource != "Empty") {
                 //Check fuel percantage and compare it to target percentage
-                if (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) <= activationPercentage) {
-                    int groupToFire = 0; //AGX: need to send correct group
-                    if (AGXInterface.AGExtInstalled())
-                    {
-                        groupToFire = int.Parse(agxGroupType);
-                    }
-                    else
-                    {
-                        groupToFire = int.Parse(group);
-                    }
-                    Helper.fireEvent(this.part, groupToFire,(int)agxGroupNum);
-                    print("KM Stager: Target percentage hit");
-                    isActive = false;
+                //If target is 0%, rounding errors can prevent firing. Run special check to prevent this
+                if (activationPercentage == 0 && (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) <= 1) && observedPart.Resources[monitoredResource].amount == lastFill) {
+                    fireAction();
                 }
+                //Once target percentage is hit, fire the action
+                else if (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) <= activationPercentage) {
+                    fireAction();
+                }
+                //Update last fill amount
+                lastFill = observedPart.Resources[monitoredResource].amount;
             }
 
         }
@@ -211,6 +208,19 @@ namespace Lib
         #endregion
 
         #region Methods
+
+        private void fireAction() {
+            int groupToFire = 0; //AGX: need to send correct group
+            if (AGXInterface.AGExtInstalled()) {
+                groupToFire = int.Parse(agxGroupType);
+            }
+            else {
+                groupToFire = int.Parse(group);
+            }
+            Helper.fireEvent(this.part, groupToFire, (int)agxGroupNum);
+            print("KM Stager: Target percentage hit");
+            isActive = false;
+        }
 
         private void findObservedPart() {
             //If this is a smart fuel tank, monitor self

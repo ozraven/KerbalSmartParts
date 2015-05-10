@@ -14,7 +14,6 @@ Parts:
 * Altimeter device that triggers actions and stages once altitude hits configured target
 * Radial fuel controllers that control fuel lines' flow
 * In-line fuel controller that controls fuel flow
-* Flameout detectors for jet engines
 * A fuel valve
 
 
@@ -117,6 +116,11 @@ v1.5.1 Added support for KSP-AVC and changed "brand"
 	* Added support for KSP-AVC
 	* Changed "brand" from Klockheed Martian to prevent mod incompatibilities
 		* Please delete old Smart Parts folder before installing v1.5.1
+v1.5.2 Bug Fixes
+	* Timer now accounts for timewarp (Thanks to NobodysNightmare)
+v1.5.3 KSP 1.0.2 compatibility and bug fixes
+	* KSP 1.0.2 compatibility
+	* Auto stager now properly activates when rounding errors result in minor fraction (<= 1%) of resource remaining in tank
 
 	 
 	 
