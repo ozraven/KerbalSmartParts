@@ -440,7 +440,6 @@ namespace Lib
 
         private void OnEditorDestroy() {
             RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
-
         }
 
         private void updateButtons()

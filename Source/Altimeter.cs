@@ -97,8 +97,8 @@ namespace Lib
             UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 500f, incrementLarge = 100f, incrementSmall = 25f, incrementSlide = 1f)]
         public float kilometerHeight = 0;
 
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Detection"),
-            UI_Toggle(disabledText = "Disabled", enabledText = "Enabled")]
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Active"),
+            UI_Toggle(disabledText = "False", enabledText = "True")]
         public bool isArmed = true;
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Trigger on"),

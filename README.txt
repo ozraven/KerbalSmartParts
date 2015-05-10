@@ -4,7 +4,7 @@ Klockheed Martian Engine Manufacture - Smart Parts Pack
 Visit the official forum thread for more information: http://forum.kerbalspaceprogram.com/threads/64227
 
 
-Source: https://github.com/dtobi/km_SmartParts
+Source: https://github.com/BrettWebb/KerbalSmartParts
 
 Parts:
 
@@ -15,6 +15,7 @@ Parts:
 * Radial fuel controllers that control fuel lines' flow
 * In-line fuel controller that controls fuel flow
 * A fuel valve
+* Proximity sensor
 
 
 
@@ -28,27 +29,36 @@ Installation Instructions
 -------------------------
 Before updating remove old Klockheed Martian Parts and, if using Space Shuttle Engines, update them.
 
-Staging Controllers (also check example crafts Firefly and Explorer)
-----------------------------------------------------------------------
+Staging Controllers 
+-------------------
 The Staging Controllers must be attached to a fuel tank or SRB. The device detects when the attached fuel tank has drained and then, depending on the device, can fire an action group or stage.
 Staging indicators can be made by assigning a light to an action group and automatically triggering that action group from via proper stager.
 How to use the Staging Controllers (also check example crafts Firefly and Explorer)
 
 Fuel Breakers and Controllers
--------------------------------
+-----------------------------
 Controls fuel drain via action groups and a context menu. Breakers break one large fuel tank into segments that fuel lines can individually drain, far less shifting overall center of mass.
 
 Radio Controller
--------------------
+----------------
 Sends events to other radio controllers on a channel. All radio controllers in range (typically < 2000 m) will execute the command if the channel matches. You can also set the throttle and heading of remote vessels.
 
 Timer
-------
+-----
 Triggers a delayed staging or action group event. The staging event is executed on the vessel to which the timer is attached, therefore able to trigger a timed action even on an inactive vessel (e.g., a separated booster).
 
 Valve
-------
-Drains excess fuel. It can drain LF, LFO and RCS. Attach it to the tank of a resource that you would like to drain. Provides nominal amount of thrust, useful to push external tank away from shuttle on seperation.
+-----
+Drains any excess resources, except electricity. Attach it to the tank of a resource that you would like to drain. Provides nominal amount of thrust, useful to push external tank away from shuttle on seperation.
+
+Altimeter
+---------
+Capable of detecting when the craft hits a specified altitude, and if it's ascending, descending, or either, and then firing an action group or staging. Useful for auto-jettisoning fairings on ascent, or activating parachutes on landing.
+
+Proximity Detector
+------------------
+Monitors other proximity detectors that are configured on the same 'channel' (20 total) and can fire actions on local and remote craft. As with altimeter, it is capable of firing on approach, departure, or both. Capable of automatic reset.
+
 
 Changelog:
 
@@ -121,7 +131,14 @@ v1.5.2 Bug Fixes
 v1.5.3 KSP 1.0.2 compatibility and bug fixes
 	* KSP 1.0.2 compatibility
 	* Auto stager now properly activates when rounding errors result in minor fraction (<= 1%) of resource remaining in tank
-
+v1.6.0 Proximity Sensor
+	* New proximity sensor part
+		* Allows up to 20 individual 'channels' to monitor
+		* Capable of firing actions on both the remote and local crafts
+		* Will select nearest object on the same channel as target
+		* Similar logic to altimeter smart part - fire on approach, departure, or both
+		* Works out to 2,000 meters
+		* As placeholder, shares model with radio. Planned to change in future. Will not break craft.
 	 
 	 
 Credits and Acknowledgments
