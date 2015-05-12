@@ -109,14 +109,14 @@ namespace Lib
             UI_Toggle(disabledText = "False", enabledText = "True")]
         public bool isArmed = false;
 
-        /* DEBUG CODE
+        // DEBUG CODE
         [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "Get Count")]
         public void getCount() {
             MonoBehaviour.print(ProxChannel.Listeners.Count());
             foreach (var listener in ProxChannel.Listeners) {
-                MonoBehaviour.print(" Name - " + listener.vessel.name + " ID - " + listener.vessel.id + " Channel - " listener.channel);
+                MonoBehaviour.print(" Name - " + listener.vessel.name + " ID - " + listener.vessel.id + " Channel - " + listener.channel + " Object ID " + listener.GetInstanceID());
             }
-        }*/
+        }
 
         #endregion
 
@@ -157,14 +157,14 @@ namespace Lib
             if (isArmed) {
                 //We're departing. Trigger at or beyond target distance
                 if (direction != "Approach" && departing && Math.Abs((currentDistance + currentWindow) - meterDistance) < currentWindow) {
-                    MonoBehaviour.print("Proximity alert. Action fired on " + this.vessel.name);
+                    MonoBehaviour.print("Proximity alert. Action fired on " + this.vessel.name + " on channel " + this.channel);
                     //This flag is checked for in OnUpdate to trigger staging
                     fireNextupdate = true;
                     isArmed = false;
                 }
                 //We're approaching. Trigger at or closer than target distance
                 else if (direction != "Departure" && !departing && Math.Abs((currentDistance - currentWindow) - meterDistance) < currentWindow) {
-                    MonoBehaviour.print("Proximity alert. Action fired on " + this.vessel.name);
+                    MonoBehaviour.print("Proximity alert. Action fired on " + this.vessel.name + " on channel " + this.channel);
                     //This flag is checked for in OnUpdate to trigger staging
                     fireNextupdate = true;
                     isArmed = false;
@@ -265,9 +265,9 @@ namespace Lib
             foreach (var listener in ProxChannel.Listeners.ToList()) {
                 if (this.vessel.id != listener.vessel.id) {
                     testDistance = Vector3d.Distance(this.vessel.GetWorldPos3D(), listener.vessel.GetWorldPos3D());
-                    //Deregister listeners that are moving beyond unpack distance
-                    if (testDistance >= 2500) {
-                        MonoBehaviour.print(listener.vessel.vesselName + " is de-registering from proximity sensor at " + testDistance + " km.");
+                    //Have active vessel deregister listeners that are moving beyond unpack distance
+                    if (testDistance >= 2500 && this.vessel.isActiveVessel) {
+                        MonoBehaviour.print(listener.vessel.vesselName + " channel " + listener.channel + " is de-registering proximity sensor at " + testDistance + " km.");
                         ProxChannel.Listeners.Remove(listener);
                     }
                     //Set distance and listener to the values from the closest non-self sensor on the same channel as us
@@ -291,7 +291,7 @@ namespace Lib
             currentWindow = (closestSensor.justRegistered ? 0 : Math.Abs(currentDistance - lastDistance) * 1.05);
             //We now have one data point. Remove the justRegistered flag for the next pass
             if (closestSensor.justRegistered) {
-                MonoBehaviour.print(closestSensor.vessel.name + " inelligible for proximity detection this time. Waiting for next pass in .02 seconds");
+                MonoBehaviour.print(closestSensor.vessel.name + " inelligible for proximity detection this time. Waiting for next pass.");
                 closestSensor.justRegistered = false;
             }
         }
@@ -304,20 +304,20 @@ namespace Lib
         }
 
         public void registerListener(Vessel ves) {
-            if (ProxChannel.Listeners.Any(listener => listener.vessel.id == this.vessel.id) == true) {
-                ProxChannel.Listeners.RemoveAll(listener => listener.vessel.id == this.vessel.id);
+            if (ProxChannel.Listeners.Any(listener => listener.vessel.id == this.vessel.id && listener.channel == this.channel) == true) {
+                ProxChannel.Listeners.RemoveAll(listener => listener.vessel.id == this.vessel.id && listener.channel == this.channel);
             }
-            MonoBehaviour.print(this.vessel.vesselName + " proximity alarm has been registered");
+            MonoBehaviour.print(this.vessel.vesselName + " proximity alarm has been registered on channel " + this.channel);
             //Register sensor to proximity sensor list
             ProxChannel.Listeners.Add(this);
             justRegistered = true;
         }
 
         public void registerListener() {
-            if (ProxChannel.Listeners.Any(listener => listener.vessel.id == this.vessel.id) == true) {
-                ProxChannel.Listeners.RemoveAll(listener => listener.vessel.id == this.vessel.id);
+            if (ProxChannel.Listeners.Any(listener => listener.vessel.id == this.vessel.id && listener.channel == this.channel) == true) {
+                ProxChannel.Listeners.RemoveAll(listener => listener.vessel.id == this.vessel.id && listener.channel == this.channel);
             }
-            MonoBehaviour.print(this.vessel.vesselName + " proximity alarm has been registered");
+            MonoBehaviour.print(this.vessel.vesselName + " proximity alarm has been registered " + this.channel);
             //Register sensor to proximity sensor list
             ProxChannel.Listeners.Add(this);
             justRegistered = true;
