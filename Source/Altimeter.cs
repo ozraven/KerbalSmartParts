@@ -109,6 +109,10 @@ namespace Lib
             UI_Toggle(disabledText = "False", enabledText = "True")]
         public bool autoReset = false;
 
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Use AGL"),
+            UI_Toggle(disabledText = "False", enabledText = "True")]
+        public bool useAGL = true;
+
         [KSPField(isPersistant = true)]
         public bool useKilometer = false;
 
@@ -179,15 +183,13 @@ namespace Lib
             //In order for physics to take effect on jettisoned parts, the staging event has to be fired from OnUpdate
             if (fireNextupdate) {
                 int groupToFire = 0; //AGX: need to send correct group
-                if (AGXInterface.AGExtInstalled())
-                {
+                if (AGXInterface.AGExtInstalled()) {
                     groupToFire = int.Parse(agxGroupType);
                 }
-                else
-                {
+                else {
                     groupToFire = int.Parse(group);
                 }
-                Helper.fireEvent(this.part, groupToFire,(int)agxGroupNum); 
+                Helper.fireEvent(this.part, groupToFire, (int)agxGroupNum);
                 fireNextupdate = false;
             }
         }
@@ -230,12 +232,10 @@ namespace Lib
             {
                 updateButtons();
                 refreshPartWindow();
-                if (agxGroupType == "1")
-                {
+                if (agxGroupType == "1") {
                     groupLastUpdate = "1";
                 }
-                else
-                {
+                else {
                     groupLastUpdate = "0";
                 }
             }
@@ -245,8 +245,7 @@ namespace Lib
         {
             UIPartActionWindow[] partWins = FindObjectsOfType<UIPartActionWindow>();
             //print("Wind count " + partWins.Count());
-            foreach (UIPartActionWindow partWin in partWins)
-            {
+            foreach (UIPartActionWindow partWin in partWins) {
                 partWin.displayDirty = true;
             }
         }
@@ -263,8 +262,19 @@ namespace Lib
             double altSurface = altSea - this.vessel.terrainAltitude;
             //Set the last altitude for the purpose of direction determination
             double lastAlt = alt;
-            //Use the lowest of the two values as the current altitude.
-            alt = (altSurface < altSea ? altSurface : altSea);
+            //Set current altitude
+            if(!this.vessel.mainBody.ocean) {
+                //If the cellestial body this craft is orbiting lacks an ocean, always use AGL
+                alt = altSurface;
+            }            
+            else if (useAGL) {
+                //If the planet has an ocean, and the "useAGL" is selected, calculate whether AGL or ASL is closer, and use that
+                alt = (altSurface < altSea ? altSurface : altSea);
+            }
+            //Otherwise, use sea level
+            else {                
+                alt = altSea;
+            }
             //Determine if the vessel is ascending or descending
             ascending = (lastAlt < alt ? true : false);
             //Update target window size based on current vertical velocity
@@ -320,8 +330,7 @@ namespace Lib
             }
 
             //Change to AGX buttons if AGX installed
-            if (AGXInterface.AGExtInstalled())
-            {
+            if (AGXInterface.AGExtInstalled()) {
                 Fields["group"].guiActiveEditor = false;
                 Fields["group"].guiActive = false;
                 Fields["agxGroupType"].guiActiveEditor = true;
@@ -334,8 +343,7 @@ namespace Lib
                     Fields["agxGroupNum"].guiActive = true;
                     //Fields["agxGroupNum"].guiName = "Group:";
                 }
-                else
-                {
+                else {
                     Fields["agxGroupNum"].guiActiveEditor = false;
                     Fields["agxGroupNum"].guiActive = false;
                     //Fields["agxGroupNum"].guiName = "N/A";

@@ -101,22 +101,25 @@ namespace Lib
             UI_ChooseOption(options = new string[] { "Both", "Approach", "Departure" })]
         public string direction = "Both";
 
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Active"),
+    UI_Toggle(disabledText = "False", enabledText = "True")]
+        public bool isArmed = true;
+
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Auto Reset"),
             UI_Toggle(disabledText = "False", enabledText = "True")]
         public bool autoReset = false;
 
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Active"),
-            UI_Toggle(disabledText = "False", enabledText = "True")]
-        public bool isArmed = false;
-
-        // DEBUG CODE
+        /* DEBUG CODE
         [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "Get Count")]
         public void getCount() {
+            MonoBehaviour.print("Debug v1");
+            MonoBehaviour.print("Current Listener Count");
             MonoBehaviour.print(ProxChannel.Listeners.Count());
+            MonoBehaviour.print("Current Listeners");
             foreach (var listener in ProxChannel.Listeners) {
-                MonoBehaviour.print(" Name - " + listener.vessel.name + " ID - " + listener.vessel.id + " Channel - " + listener.channel + " Object ID " + listener.GetInstanceID());
+                MonoBehaviour.print(" Name - " + listener.vessel.name + " ID - " + listener.vessel.id + " Channel - " + listener.channel);
             }
-        }
+        } */
 
         #endregion
 
@@ -134,23 +137,27 @@ namespace Lib
         #region Overrides
 
         public override void OnStart(StartState state) {
-            this.part.force_activate();
             //Clear listeners if the scene changes. Will be recreated on new scene load
             GameEvents.onGameSceneLoadRequested.Add(clearListeners);
-            GameEvents.onVesselLoaded.Add(registerListener);
-            //Remove from listeners if vessel or part is destroyed
-            this.vessel.OnJustAboutToBeDestroyed += OnJustAboutToBeDestroyed;
-            this.part.OnJustAboutToBeDestroyed += OnJustAboutToBeDestroyed;
+            //Redraw buttons
+            updateButtons();
             if (state == StartState.Editor) {
                 this.part.OnEditorAttach += OnEditorAttach;
                 this.part.OnEditorDetach += OnEditorDetach;
                 this.part.OnEditorDestroy += OnEditorDestroy;
             }
-            registerListener();
-            updateButtons();
+            if (state != StartState.Editor) {
+                //Force activation of proximity sensor upon load/unpack
+                this.part.force_activate();
+                //Register the listener
+                registerListener();
+            }
         }
 
         public override void OnFixedUpdate() {
+            if(justRegistered){
+                justRegistered = false;
+            }
             //Update target distance and determine target window
             updateDistance();
             //If the device is armed, check for the trigger altitude
@@ -187,6 +194,10 @@ namespace Lib
         }
 
         public override void OnUpdate() {
+            //If this proximity sensor isn't registered, register it now
+            if (ProxChannel.Listeners.Any(listener => listener.vessel.id == this.vessel.id && listener.channel == this.channel) == false) {
+                registerListener();
+            }
             //In order for physics to take effect on jettisoned parts, the staging event has to be fired from OnUpdate
             if (fireNextupdate && !justRegistered) {
                 int groupToFire = 0; //AGX: need to send correct group
@@ -198,21 +209,6 @@ namespace Lib
                 }
                 Helper.fireEvent(this.part, groupToFire, (int)agxGroupNum);
                 fireNextupdate = false;
-            }
-        }
-
-        public void Update() //AGX: The OnUpdate above only seems to run in flight mode, Update() here runs in all scenes
-                {
-            if (agxGroupType == "1" & groupLastUpdate != "1" || agxGroupType != "1" & groupLastUpdate == "1") //AGX: Monitor group to see if we need to refresh window
-            {
-                updateButtons();
-                refreshPartWindow();
-                if (agxGroupType == "1") {
-                    groupLastUpdate = "1";
-                }
-                else {
-                    groupLastUpdate = "0";
-                }
             }
         }
 
@@ -265,13 +261,8 @@ namespace Lib
             foreach (var listener in ProxChannel.Listeners.ToList()) {
                 if (this.vessel.id != listener.vessel.id) {
                     testDistance = Vector3d.Distance(this.vessel.GetWorldPos3D(), listener.vessel.GetWorldPos3D());
-                    //Have active vessel deregister listeners that are moving beyond unpack distance
-                    if (testDistance >= 2500 && this.vessel.isActiveVessel) {
-                        MonoBehaviour.print(listener.vessel.vesselName + " channel " + listener.channel + " is de-registering proximity sensor at " + testDistance + " km.");
-                        ProxChannel.Listeners.Remove(listener);
-                    }
                     //Set distance and listener to the values from the closest non-self sensor on the same channel as us
-                    else if (listener.channel == this.channel && (testDistance < currentDistance || closestSensor == null)) {
+                    if (listener.channel == this.channel && (testDistance < currentDistance || closestSensor == null)) {
                         closestSensor = listener;
                         currentDistance = testDistance;
                     }
@@ -292,20 +283,38 @@ namespace Lib
             //We now have one data point. Remove the justRegistered flag for the next pass
             if (closestSensor.justRegistered) {
                 MonoBehaviour.print(closestSensor.vessel.name + " inelligible for proximity detection this time. Waiting for next pass.");
-                closestSensor.justRegistered = false;
             }
+        }
+
+        public void Update() { //AGX: The OnUpdate above only seems to run in flight mode, Update() here runs in all scenes
+            if (agxGroupType == "1" & groupLastUpdate != "1" || agxGroupType != "1" & groupLastUpdate == "1") //AGX: Monitor group to see if we need to refresh window
+            {
+                updateButtons();
+                refreshPartWindow();
+                if (agxGroupType == "1") {
+                    groupLastUpdate = "1";
+                }
+                else {
+                    groupLastUpdate = "0";
+                }
+            }
+        }
+
+        public void OnDestroy() {
+            GameEvents.onGameSceneLoadRequested.Remove(clearListeners);
+            deregisterListener(this);
         }
 
         public void clearListeners(GameScenes scene) {
             //On scene change, clear out all of the registered listeners
             ProxChannel.Listeners.Clear();
             ProxChannel.Listeners.TrimExcess();
-            MonoBehaviour.print("OnSceneChange");
         }
 
-        public void registerListener(Vessel ves) {
+        public void registerListener() {
+            //Remove duplicate entries from the list
             if (ProxChannel.Listeners.Any(listener => listener.vessel.id == this.vessel.id && listener.channel == this.channel) == true) {
-                ProxChannel.Listeners.RemoveAll(listener => listener.vessel.id == this.vessel.id && listener.channel == this.channel);
+                return;
             }
             MonoBehaviour.print(this.vessel.vesselName + " proximity alarm has been registered on channel " + this.channel);
             //Register sensor to proximity sensor list
@@ -313,35 +322,17 @@ namespace Lib
             justRegistered = true;
         }
 
-        public void registerListener() {
+        public void deregisterListener(ProxSensor sensor) {
             if (ProxChannel.Listeners.Any(listener => listener.vessel.id == this.vessel.id && listener.channel == this.channel) == true) {
-                ProxChannel.Listeners.RemoveAll(listener => listener.vessel.id == this.vessel.id && listener.channel == this.channel);
-            }
-            MonoBehaviour.print(this.vessel.vesselName + " proximity alarm has been registered " + this.channel);
-            //Register sensor to proximity sensor list
-            ProxChannel.Listeners.Add(this);
-            justRegistered = true;
-        }
-
-        private void refreshPartWindow() //AGX: Refresh right-click part window to show/hide Groups slider
-        {
-            UIPartActionWindow[] partWins = FindObjectsOfType<UIPartActionWindow>();
-            //print("Wind count " + partWins.Count());
-            foreach (UIPartActionWindow partWin in partWins) {
-                partWin.displayDirty = true;
+                MonoBehaviour.print(sensor.vessel.vesselName + " proximity alarm has been deregistered on channel " + sensor.channel);
+                ProxChannel.Listeners.Remove(sensor);
+                ProxChannel.Listeners.TrimExcess();
             }
         }
 
         private void OnDetach(bool first) {
-            MonoBehaviour.print("OnDetach");
-            //Remove prox sensor from listener list
-            ProxChannel.Listeners.Remove(this);
-        }
-
-        private void OnJustAboutToBeDestroyed() {
-            MonoBehaviour.print("OnJustAboutToBeDestroyed");
-            //Remove prox sensor from listener list
-            ProxChannel.Listeners.Remove(this);
+            //Remove this prox sensor from listener list
+            deregisterListener(this);
         }
 
         private void OnEditorAttach() {
@@ -360,6 +351,14 @@ namespace Lib
         public void updateEditor() {
             //Update buttons
             updateButtons();
+        }
+
+        private void refreshPartWindow() { //AGX: Refresh right-click part window to show/hide Groups slider
+            UIPartActionWindow[] partWins = FindObjectsOfType<UIPartActionWindow>();
+            //print("Wind count " + partWins.Count());
+            foreach (UIPartActionWindow partWin in partWins) {
+                partWin.displayDirty = true;
+            }
         }
 
         #endregion

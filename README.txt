@@ -148,7 +148,12 @@ v1.6.3 KIS Support
 v1.6.4 Bug Fixes
 	* Fixed bug with name and description of proximity sensor
 	* WARNING - Will break craft using old sensor
-	 
+v1.6.5 Altimeter AGL/ASL Selector + Bug Fixes
+	* Fixed various bugs with proximity sensor
+	* Fixed bug with altimeter that could cause it to trigger prematuraly on planets/moons with no ocean
+	* Altimeter now allows user to select AGL or ASL selection
+		* ASL mode will still use AGL if over planet with no ocean
+		* AGL mode will still use ASL if it is over water
 	 
 Credits and Acknowledgments
 ------------------------------
