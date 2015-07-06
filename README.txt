@@ -154,6 +154,11 @@ v1.6.5 Altimeter AGL/ASL Selector + Bug Fixes
 	* Altimeter now allows user to select AGL or ASL selection
 		* ASL mode will still use AGL if over planet with no ocean
 		* AGL mode will still use ASL if it is over water
+v1.6.6 KSP 1.0.4 compatibility, DDS textures, and bug fixes
+	* KSP 1.0.4 compatibility
+	* Converted to DDS textures (Thanks to InsanePlumber)
+	* Fixed bug with auto stager that could cause premature activation when set to 0%
+
 	 
 Credits and Acknowledgments
 ------------------------------

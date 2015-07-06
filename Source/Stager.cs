@@ -72,16 +72,16 @@ namespace Lib
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Detection"),
             UI_Toggle(disabledText = "Disabled", enabledText = "Enabled")]
-        public bool isActive = true;
+        public bool isArmed = true;
 
         [KSPAction("Activate Detection")]
         public void doActivateAG(KSPActionParam param) {
-            isActive = true;
+            isArmed = true;
         }
 
         [KSPAction("Deactivate Detection")]
         public void doDeActivateAG(KSPActionParam param) {
-            isActive = false;
+            isArmed = false;
         }
 
         #endregion
@@ -91,6 +91,8 @@ namespace Lib
         private Part observedPart = null;
         private string groupLastUpdate = "0"; //AGX: What was our selected group last update frame? Top slider.
         private double lastFill = 0; // save the last fill level when the tank drains
+        private Boolean fireNextupdate = false;
+        private Boolean illuminated = false;
 
         #endregion
 
@@ -103,6 +105,8 @@ namespace Lib
                 this.part.OnEditorDestroy += OnEditorDestroy;
             }
             print("KM Stager Started");
+            //Force activation no matter which stage it's on
+            this.part.force_activate();
             //Find which part we should be monitoring in flight
             if (HighLogic.LoadedSceneIsFlight) {
                 findObservedPart();
@@ -117,20 +121,28 @@ namespace Lib
             updateButtons();
         }
 
+        public override void OnUpdate() {
+            //In order for physics to take effect on jettisoned parts, the staging event has to be fired from OnUpdate
+            if (fireNextupdate) {
+                fireAction();
+                fireNextupdate = false;
+            }
+        }
+
         public override void OnAwake() {
             PartMessageService.Register(this);
         }
 
-        public override void OnUpdate() {
-            if (isActive && observedPart != null && monitoredResource != "Empty") {
+        public override void OnFixedUpdate() {
+            if (isArmed && observedPart != null && monitoredResource != "Empty") {
                 //Check fuel percantage and compare it to target percentage
                 //If target is 0%, rounding errors can prevent firing. Run special check to prevent this
                 if (activationPercentage == 0 && (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) <= 1) && observedPart.Resources[monitoredResource].amount == lastFill) {
-                    fireAction();
+                    fireNextupdate = true;
                 }
                 //Once target percentage is hit, fire the action
                 else if (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) <= activationPercentage) {
-                    fireAction();
+                    fireNextupdate = true;
                 }
                 //Update last fill amount
                 lastFill = observedPart.Resources[monitoredResource].amount;
@@ -138,8 +150,8 @@ namespace Lib
 
         }
 
-        public void Update() //AGX: The OnUpdate above only seems to run in flight mode, Update() here runs in all scenes
-        {
+        public void Update() {
+            //AGX: The OnUpdate above only seems to run in flight mode, Update() here runs in all scenes
             if (agxGroupType == "1" & groupLastUpdate != "1" || agxGroupType != "1" & groupLastUpdate == "1") //AGX: Monitor group to see if we need to refresh window
             {
                 updateButtons();
@@ -218,8 +230,9 @@ namespace Lib
                 groupToFire = int.Parse(group);
             }
             Helper.fireEvent(this.part, groupToFire, (int)agxGroupNum);
+            lightsOn();
             print("KM Stager: Target percentage hit");
-            isActive = false;
+            isArmed = false;
         }
 
         private void findObservedPart() {
@@ -233,7 +246,7 @@ namespace Lib
                 print("KM Stager: Monitoring parent part");
                 observedPart = this.part.parent;
             }
-            print("KM Stager: Set observed part to " + observedPart.partName + "Active is: " + isActive);
+            print("KM Stager: Set observed part to " + observedPart.partName + "Active is: " + isArmed);
         }
 
         private void updateList() {
@@ -258,6 +271,13 @@ namespace Lib
                     monitoredResource = "Empty";
                 }
             }
+        }
+
+        private void lightsOn() {
+            //Switch off model lights
+            Utility.switchLight(this.part, "light-go", true);
+            Utility.playAnimationSetToPosition(this.part, "glow", 1);
+            illuminated = true;
         }
 
         [PartMessageListener(typeof(PartResourceListChanged), scenes: GameSceneFilter.AnyEditor, relations: PartRelationship.Parent)]

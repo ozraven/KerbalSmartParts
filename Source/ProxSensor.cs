@@ -102,7 +102,7 @@ namespace Lib
         public string direction = "Both";
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Active"),
-    UI_Toggle(disabledText = "False", enabledText = "True")]
+            UI_Toggle(disabledText = "False", enabledText = "True")]
         public bool isArmed = true;
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Auto Reset"),
@@ -210,6 +210,20 @@ namespace Lib
                 Helper.fireEvent(this.part, groupToFire, (int)agxGroupNum);
                 fireNextupdate = false;
             }
+        }
+
+        #endregion
+
+        #region Events
+
+        [KSPAction("Activate Detection")]
+        public void doActivateAG(KSPActionParam param) {
+            isArmed = true;
+        }
+
+        [KSPAction("Deactivate Detection")]
+        public void doDeActivateAG(KSPActionParam param) {
+            isArmed = false;
         }
 
         #endregion
