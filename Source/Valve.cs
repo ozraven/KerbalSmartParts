@@ -119,7 +119,7 @@ namespace Lib
                 //Flow rate * number of resources vented * current time step * thrust coefficient (assuming ISP of ~65 and 5 kg per unit of fuel)
                 float appliedForce = force * part.parent.Resources.Count * timeStep * .65f;
                 valveEffect.localVelocity.y = maxSpeedY * force / 100;
-                this.rigidbody.AddRelativeForce((facing == 0 ? Vector3.up : Vector3.forward) * appliedForce * 1);
+				this.part.Rigidbody.AddRelativeForce((facing == 0 ? Vector3.up : Vector3.forward) * appliedForce * 1);
                 foreach (PartResource resource in part.parent.Resources) {
                     if (resource.resourceName == "ElectricCharge")
                         continue;
