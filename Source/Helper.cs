@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using KSP.IO;
+using KSP.UI.Screens;
 
 namespace Lib
 {
@@ -97,7 +98,7 @@ namespace Lib
             //If this is the currently active vessel, activate the next, now empty, stage. This is an ugly, ugly hack but it's the only way to clear out the empty stage.
             //Switching to a vessel that has been staged this way already clears out the empty stage, so this isn't required for those.
             if (v.isActiveVessel) {
-                Staging.ActivateNextStage();
+				StageManager.ActivateNextStage ();
             }
         }
 
