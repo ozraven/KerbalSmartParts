@@ -10,7 +10,6 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using KSP.IO;
-using KSPAPIExtensions;
 
 namespace Lib
 {
@@ -161,12 +160,6 @@ namespace Lib
         #region Overrides
 
         public override void OnStart(StartState state) {
-            if (state == StartState.Editor) {
-                this.part.OnEditorAttach += OnEditorAttach;
-                this.part.OnEditorDetach += OnEditorDetach;
-                this.part.OnEditorDestroy += OnEditorDestroy;
-                OnEditorAttach();
-            }
             //Initial button layout
             updateButtons();
             //Force activation no matter which stage it's on
@@ -361,20 +354,7 @@ namespace Lib
             }
         }
 
-        private void OnEditorAttach() {
-            RenderingManager.AddToPostDrawQueue(99, updateEditor);
-        }
-
-        private void OnEditorDetach() {
-            RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
-        }
-
-        private void OnEditorDestroy() {
-            RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
-
-        }
-
-        private void updateEditor() {
+		private void onGUI() {
             //Update buttons
             updateButtons();
         }

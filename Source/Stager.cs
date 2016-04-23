@@ -5,9 +5,6 @@
  */
 
 using KSP.IO;
-using KSPAPIExtensions;
-using KSPAPIExtensions.PartMessage;
-using KSPAPIExtensions.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -101,8 +98,6 @@ namespace Lib
         public override void OnStart(StartState state) {
             if (state == StartState.Editor) {
                 this.part.OnEditorAttach += OnEditorAttach;
-                this.part.OnEditorDetach += OnEditorDetach;
-                this.part.OnEditorDestroy += OnEditorDestroy;
             }
             print("KM Stager Started");
             //Force activation no matter which stage it's on
@@ -130,7 +125,6 @@ namespace Lib
         }
 
         public override void OnAwake() {
-            PartMessageService.Register(this);
         }
 
         public override void OnFixedUpdate() {
@@ -280,29 +274,17 @@ namespace Lib
             illuminated = true;
         }
 
-        [PartMessageListener(typeof(PartResourceListChanged), scenes: GameSceneFilter.AnyEditor, relations: PartRelationship.Parent)]
-        [PartMessageListener(typeof(PartResourceListChanged), scenes: GameSceneFilter.AnyEditor, relations: PartRelationship.Self)]
+/*
         private void changeListener() {
             print("KM Stager: Monitored part resoruces changed. Updating.");
             findObservedPart();
             updateList();
         }
+*/
 
         private void OnEditorAttach() {
-            RenderingManager.AddToPostDrawQueue(99, updateEditor);
             findObservedPart();
             updateList();
-        }
-
-        private void OnEditorDetach() {
-            RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
-        }
-
-        private void OnEditorDestroy() {
-            RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
-        }
-
-        private void updateEditor() {
         }
 
         #endregion

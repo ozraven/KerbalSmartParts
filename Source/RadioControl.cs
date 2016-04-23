@@ -10,7 +10,6 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using KSP.IO;
-using KSPAPIExtensions;
 
 namespace Lib
 {
@@ -362,14 +361,7 @@ namespace Lib
 
         public override void OnStart(StartState state) {
             if (state == StartState.Editor) {
-                this.part.OnEditorAttach += OnEditorAttach;
-                this.part.OnEditorDetach += OnEditorDetach;
-                this.part.OnEditorDestroy += OnEditorDestroy;
                 this.part.OnJustAboutToBeDestroyed += OnJustAboutToBeDestroyed;
-
-
-
-                OnEditorAttach();
             }
             else {
                 Channel.radioListeners.Add(this);
@@ -429,19 +421,6 @@ namespace Lib
             MonoBehaviour.print("OnJustAboutToBeDestroyed");
         }
 
-        private void OnEditorAttach() {
-            RenderingManager.AddToPostDrawQueue(99, updateEditor);
-        }
-
-        private void OnEditorDetach() {
-
-            RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
-        }
-
-        private void OnEditorDestroy() {
-            RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
-        }
-
         private void updateButtons()
         {
             //Change to AGX buttons if AGX installed
@@ -488,9 +467,6 @@ namespace Lib
             }
         }
 
-        private void updateEditor() {
-
-        }
     }
 }
 

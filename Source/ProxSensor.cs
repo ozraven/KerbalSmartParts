@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using KSP.IO;
-using KSPAPIExtensions;
 
 namespace Lib
 {
@@ -141,11 +140,6 @@ namespace Lib
             GameEvents.onGameSceneLoadRequested.Add(clearListeners);
             //Redraw buttons
             updateButtons();
-            if (state == StartState.Editor) {
-                this.part.OnEditorAttach += OnEditorAttach;
-                this.part.OnEditorDetach += OnEditorDetach;
-                this.part.OnEditorDestroy += OnEditorDestroy;
-            }
             if (state != StartState.Editor) {
                 //Force activation of proximity sensor upon load/unpack
                 this.part.force_activate();
@@ -349,20 +343,7 @@ namespace Lib
             deregisterListener(this);
         }
 
-        private void OnEditorAttach() {
-            RenderingManager.AddToPostDrawQueue(99, updateEditor);
-        }
-
-        private void OnEditorDetach() {
-
-            RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
-        }
-
-        private void OnEditorDestroy() {
-            RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
-        }
-
-        public void updateEditor() {
+        public void onGUI() {
             //Update buttons
             updateButtons();
         }

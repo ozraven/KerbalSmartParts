@@ -10,7 +10,6 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using KSP.IO;
-using KSPAPIExtensions;
 
 namespace Lib
 {
@@ -178,12 +177,6 @@ namespace Lib
         #region Overrides
 
         public override void OnStart(StartState state) {
-            if (state == StartState.Editor) {
-                this.part.OnEditorAttach += OnEditorAttach;
-                this.part.OnEditorDetach += OnEditorDetach;
-                this.part.OnEditorDestroy += OnEditorDestroy;
-                OnEditorAttach();
-            }
             if(!armed){
                 Utility.switchLight(this.part, "light-go", true);
                 Utility.playAnimationSetToPosition(this.part, "glow", 1);
@@ -387,19 +380,7 @@ namespace Lib
             }
         }
 
-        private void OnEditorAttach() {
-            RenderingManager.AddToPostDrawQueue(99, updateEditor);
-        }
-
-        private void OnEditorDetach() {
-            RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
-        }
-
-        private void OnEditorDestroy() {
-            RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
-        }
-
-        private void updateEditor() {
+        private void onGUI() {
             //Update Buttons
             updateButtons();
         }
