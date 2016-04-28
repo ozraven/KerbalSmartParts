@@ -11,6 +11,8 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
+using KSP.UI;
+
 namespace Lib
 {
     public class Stager : PartModule
@@ -81,7 +83,37 @@ namespace Lib
             isArmed = false;
         }
 
-        #endregion
+		#endregion
+		#if false
+		#region Events
+
+		void onDismiss()
+		{
+			print ("onDismiss");
+			Events ["ActivateEvent"].active = true;
+		}
+		void onAccept(string name, VesselType vt)
+		{
+			print ("name: " + name + "    VesselType: " + vt.ToString ());
+			FlightGlobals.ActiveVessel.vesselName = name;
+
+			print ("FlightGlobals.ActiveVessel.name: " + FlightGlobals.ActiveVessel.name);
+			Events ["ActivateEvent"].active = true;
+		}
+		[KSPEvent(active = true, guiActive = true, guiActiveEditor = true, guiName = "Name Cmd Part")]
+		public void ActivateEvent()
+		{
+			ScreenMessages.PostScreenMessage("Clicked Activate", 5.0f, ScreenMessageStyle.UPPER_CENTER);
+
+			// This will hide the Activate event, and show the Deactivate event.
+			Events["ActivateEvent"].active = false;
+			//Events["DeactivateEvent"].active = true;
+
+			KSP.UI.Screens.VesselRenameDialog.Spawn(FlightGlobals.ActiveVessel, onAccept, onDismiss, true, VesselType.Probe);
+
+		}
+		#endregion
+		#endif
 
         #region Variables
 
