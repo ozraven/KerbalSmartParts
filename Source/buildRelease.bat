@@ -31,10 +31,10 @@ mkdir %HOMEDIR%\install\GameData\SmartParts\Plugins
 mkdir %HOMEDIR%\install\GameData\SmartParts\Sounds
 
 
-del %HOMEDIR%\install\GameData\SmartParts
-del %HOMEDIR%\install\GameData\SmartParts\Parts
-del %HOMEDIR%\install\GameData\SmartParts\Plugins
-del %HOMEDIR%\install\GameData\SmartParts\Sounds
+del /Q %HOMEDIR%\install\GameData\SmartParts
+del /Q %HOMEDIR%\install\GameData\SmartParts\Parts
+del /Q %HOMEDIR%\install\GameData\SmartParts\Plugins
+del /Q %HOMEDIR%\install\GameData\SmartParts\Sounds
 
 
 copy /Y "%~dp0..\bin\Release\SmartParts.dll" "%HOMEDIR%\install\GameData\SmartParts\Plugins"
@@ -42,6 +42,13 @@ copy /Y "%~dp0..\bin\Release\SmartParts.dll" "%HOMEDIR%\install\GameData\SmartPa
 copy /Y "%~dp0SmartParts.version" "%HOMEDIR%\install\GameData\SmartParts"
 
 xcopy /Y /S "%~dp0..\GameData\SmartParts\Parts" "%HOMEDIR%\install\GameData\SmartParts\Parts"
+
+
+del %HOMEDIR%\install\GameData\SmartParts\Parts\Fuel-Breakers\*.tga
+del %HOMEDIR%\install\GameData\SmartParts\Parts\Fuel-Controller\*.tga
+del %HOMEDIR%\install\GameData\SmartParts\Parts\Smart-Controller\*.tga
+del %HOMEDIR%\install\GameData\SmartParts\Parts\Valve\*.tga
+
 
 copy /Y "%~dp0..\License.txt" "%HOMEDIR%\installv\GameData\SmartParts"
 copy /Y "%~dp0..\README.md" "%HOMEDIR%\install\GameData\SmartParts"

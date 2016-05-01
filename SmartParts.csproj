@@ -74,5 +74,6 @@
     <None Include="Source\deploy.bat" />
     <None Include="Source\buildRelease.bat" />
     <None Include="Source\SmartParts.version" />
+    <None Include="Source\Changelog.txt" />
   </ItemGroup>
 </Project>
