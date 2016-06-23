@@ -46,7 +46,8 @@ namespace Lib
                 "12",
                 "13",
                 "14",
-                "15"
+                "15",
+                "16"
             },
             display = new String[] {
                 "Stage",
@@ -64,7 +65,8 @@ namespace Lib
                 "RCS",
                 "SAS",
                 "Brakes",
-                "Abort"
+                "Abort",
+                "Gear"
             }
         )]
         public string group = "0";
@@ -79,7 +81,8 @@ namespace Lib
                 "12",
                 "13",
                 "14",
-                "15"
+                "15",
+                "16"
             },
             display = new String[] {
                 "Stage",
@@ -88,7 +91,8 @@ namespace Lib
                 "RCS",
                 "SAS",
                 "Brakes",
-                "Abort"
+                "Abort",
+                "Gear"
             }
         )]
         public string agxGroupType = "0";
@@ -194,8 +198,15 @@ namespace Lib
         }
 
         [KSPAction("Transmit Abort")]
-        public void transmit_Abort(KSPActionParam param) {
+        public void transmit_Abort(KSPActionParam param)
+        {
             transmitCommand(15);
+        }
+
+        [KSPAction("Transmit Gear")]
+        public void transmit_Gear(KSPActionParam param)
+        {
+            transmitCommand(16);
         }
 
         [KSPEvent(guiName = "Transmit Command", guiActive = true)]

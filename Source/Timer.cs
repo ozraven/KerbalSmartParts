@@ -11,6 +11,8 @@ using System.Text;
 using UnityEngine;
 using KSP.IO;
 
+using KSP.UI.Screens;
+
 namespace Lib
 {
     public class Timer : PartModule
@@ -35,7 +37,8 @@ namespace Lib
                 "12",
                 "13",
                 "14",
-                "15"
+                "15",
+                "16"
             },
             display = new String[] {
                 "Stage",
@@ -53,7 +56,8 @@ namespace Lib
                 "RCS",
                 "SAS",
                 "Brakes",
-                "Abort"
+                "Abort",
+                "Gear"
             }
         )]
         public string group = "0";
@@ -68,7 +72,8 @@ namespace Lib
                 "12",
                 "13",
                 "14",
-                "15"
+                "15",
+                "16"
             },
             display = new String[] {
                 "Stage",
@@ -77,7 +82,8 @@ namespace Lib
                 "RCS",
                 "SAS",
                 "Brakes",
-                "Abort"
+                "Abort",
+                "Gear"
             }
         )]
         public string agxGroupType = "0";
@@ -204,7 +210,7 @@ namespace Lib
 
         public override void OnUpdate() {
             //Check to see if the timer has been dragged in the staging list. If so, reset icon color
-            if (this.part.inverseStage != previousStage && allowStage && !armed && this.part.inverseStage + 1 < Staging.CurrentStage) {
+            if (this.part.inverseStage != previousStage && allowStage && !armed && this.part.inverseStage + 1 < StageManager.CurrentStage) {
                 reset();
             }
             previousStage = this.part.inverseStage;
@@ -268,7 +274,7 @@ namespace Lib
 
         private void enableStaging() {
             part.stackIcon.CreateIcon();
-            Staging.SortIcons();
+            StageManager.Instance.SortIcons(true);
             allowStage = true;
 
             //Toggle button visibility so currently inactive mode's button is visible
@@ -278,7 +284,7 @@ namespace Lib
 
         private void disableStaging() {
             part.stackIcon.RemoveIcon();
-            Staging.SortIcons();
+            StageManager.Instance.SortIcons(true);
             allowStage = false;
 
             //Toggle button visibility so currently inactive mode's button is visible

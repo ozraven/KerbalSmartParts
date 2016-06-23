@@ -34,7 +34,8 @@ namespace Lib
             { 12, KSPActionGroup.RCS },
             { 13, KSPActionGroup.SAS },
             { 14, KSPActionGroup.Brakes },
-            { 15, KSPActionGroup.Abort }
+            { 15, KSPActionGroup.Abort },
+            { 16, KSPActionGroup.Gear }
         };
 
         public static Dictionary<int, String> KM_dictAGNames = new Dictionary<int, String> {
@@ -54,7 +55,8 @@ namespace Lib
             { 13, "SAS" },
             { 14, "Brakes" },
             { 15, "Abort" },
-            { 16, "Beep" },
+            { 16, "Gear" },
+            { 17, "Beep" },
         };
 
         public static int maxEvent = 17;

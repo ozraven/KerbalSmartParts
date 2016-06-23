@@ -40,7 +40,8 @@ namespace Lib
                 "12",
                 "13",
                 "14",
-                "15"
+                "15",
+                "16"
             },
             display = new String[] {
                 "Stage",
@@ -58,7 +59,8 @@ namespace Lib
                 "RCS",
                 "SAS",
                 "Brakes",
-                "Abort"
+                "Abort",
+                "Gear"
             }
         )]
         public string group = "0";
@@ -77,7 +79,8 @@ namespace Lib
                 "12",
                 "13",
                 "14",
-                "15"
+                "15",
+                "16"
             },
             display = new String[] {
                 "Stage",
@@ -86,7 +89,8 @@ namespace Lib
                 "RCS",
                 "SAS",
                 "Brakes",
-                "Abort"
+                "Abort",
+                "Gear"
             }
         )]
         public string agxGroupType = "0";

@@ -18,3 +18,4 @@ D:\Users\jbb\github\KerbalSmartParts\bin\Release\UnityEngine.xml
 D:\Users\jbb\github\KerbalSmartParts\obj\Release\SmartParts.dll
 D:\Users\jbb\github\KerbalSmartParts\obj\Release\SmartParts.pdb
 D:\Users\jbb\github\KerbalSmartParts\obj\Release\SmartParts.csprojResolveAssemblyReference.cache
+D:\Users\jbb\github\KerbalSmartParts\bin\Release\System.dll

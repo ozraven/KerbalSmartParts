@@ -10,6 +10,8 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
+using KSP.UI.Screens;
+
 namespace Lib
 {
     public class Valve : PartModule
@@ -158,7 +160,7 @@ namespace Lib
 
         private void enableStaging() {
             part.stackIcon.CreateIcon();
-            Staging.SortIcons();
+            StageManager.Instance.SortIcons(true);
             allowStage = true;
 
             //Toggle button visibility so currently inactive mode's button is visible
@@ -168,7 +170,7 @@ namespace Lib
 
         private void disableStaging() {
             part.stackIcon.RemoveIcon();
-            Staging.SortIcons();
+            StageManager.Instance.SortIcons(true);
             allowStage = false;
 
             //Toggle button visibility so currently inactive mode's button is visible
