@@ -3,3 +3,7 @@
 1.7.2		Incorporated changes by Deimos Rast:
 			1.  Converted textues to DDS
 			2.  Fixed missing closing brace in the parts files
+
+1.8.1		Added Speedmeter smart part, from @dragonfi's fork
+			Updated Speedmeter to 1.1.3 standards
+			using model modeified by martinezfg11
