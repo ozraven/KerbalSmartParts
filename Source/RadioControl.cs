@@ -287,7 +287,8 @@ namespace Lib
 
             this.vessel.ActionGroups.SetGroup(KSPActionGroup.SAS, true);
             print("Listener:" + vessel.vesselName + "received command" + group);
-            this.vessel.Autopilot.SAS.LockHeading(targetUp, true);
+            this.vessel.Autopilot.SAS.LockRotation(targetUp);
+            this.vessel.Autopilot.SAS.lockedMode = true;
             this.vessel.Autopilot.SAS.Update();
             indicateReceive(playSound);
         }
