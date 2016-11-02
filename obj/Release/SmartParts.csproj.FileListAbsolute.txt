@@ -12,6 +12,5 @@ D:\Users\jbb\github\KerbalSmartParts\bin\Release\Mono.Cecil.dll
 D:\Users\jbb\github\KerbalSmartParts\bin\Release\TDx.TDxInput.dll
 D:\Users\jbb\github\KerbalSmartParts\bin\Release\Mono.Security.dll
 D:\Users\jbb\github\KerbalSmartParts\bin\Release\UnityEngine.xml
-D:\Users\jbb\github\KerbalSmartParts\obj\Release\SmartParts.csprojResolveAssemblyReference.cache
 D:\Users\jbb\github\KerbalSmartParts\obj\Release\SmartParts.dll
 D:\Users\jbb\github\KerbalSmartParts\obj\Release\SmartParts.pdb
