@@ -13,11 +13,11 @@ using KSP.IO;
 
 namespace Lib
 {
-    public class Altimeter : PartModule
+    public class Altimeter : SmartSensorModuleBase
     {
 
         #region Fields
-
+#if false
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group"),
             UI_ChooseOption(
             options = new String[] {
@@ -92,6 +92,16 @@ namespace Lib
             UI_FloatEdit(scene = UI_Scene.All, minValue = 1f, maxValue = 250f, incrementLarge = 75f, incrementSmall = 25f, incrementSlide = 1f)]
         public float agxGroupNum = 1;
 
+      [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Active"),
+            UI_Toggle(disabledText = "False", enabledText = "True")]
+        public bool isArmed = true;
+
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Auto Reset"),
+            UI_Toggle(disabledText = "False", enabledText = "True")]
+        public bool autoReset = false;
+
+#endif
+
         [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Meters", guiFormat = "F0", guiUnits = "m"),
             UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 1000f, incrementLarge = 200f, incrementSmall = 25f, incrementSlide = 1f)]
         public float meterHeight = 0;
@@ -99,30 +109,24 @@ namespace Lib
         [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Kilometers", guiFormat = "F0", guiUnits = "km"),
             UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 500f, incrementLarge = 100f, incrementSmall = 25f, incrementSlide = 1f)]
         public float kilometerHeight = 0;
-
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Active"),
-            UI_Toggle(disabledText = "False", enabledText = "True")]
-        public bool isArmed = true;
-
+  
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Trigger on"),
             UI_ChooseOption(options = new string[] { "All", "Ascent", "Descent" })]
         public string direction = "All";
 
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Auto Reset"),
-            UI_Toggle(disabledText = "False", enabledText = "True")]
-        public bool autoReset = false;
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Use AGL"),
             UI_Toggle(disabledText = "False", enabledText = "True")]
         public bool useAGL = true;
 
+
         [KSPField(isPersistant = true)]
         public bool useKilometer = false;
 
-        #endregion
+#endregion
 
 
-        #region Events
+#region Events
 
         [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Use Kilometers")]
         public void useKilometers() {
@@ -146,6 +150,17 @@ namespace Lib
             isArmed = false;
         }
 
+        [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "Lights On")]
+        public void doLightsOn()
+        {
+            lightsOn();
+        }
+        [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "Lights Off")]
+        public void doLightsOff()
+        {
+            lightsOff();
+        }
+
         #endregion
 
 
@@ -158,10 +173,10 @@ namespace Lib
         private Boolean fireNextupdate = false;
         private string groupLastUpdate = "0"; //AGX: What was our selected group last update frame? Top slider.
 
-        #endregion
+#endregion
 
 
-        #region Overrides
+#region Overrides
 
         public override void OnStart(StartState state) {
             //Initial button layout
@@ -170,6 +185,7 @@ namespace Lib
             this.part.force_activate();
             print("KM Altimeter Detector Started");
             updateButtons();
+            initLight(true, "light-go");
         }
 
         public override void OnUpdate() {
@@ -247,10 +263,10 @@ namespace Lib
             }
         }
 
-        #endregion
+#endregion
 
 
-        #region Methods
+#region Methods
 
         private void updateAltitude() {
             //Sea altitude
@@ -280,14 +296,16 @@ namespace Lib
 
         private void lightsOn() {
             //Switch off model lights
-            Utility.switchLight(this.part, "light-go", true);
+            Utility.switchEmissive(this, lightComponentOn, true);
+          //  Utility.switchLight(this.part, "light-go", true);
             Utility.playAnimationSetToPosition(this.part, "glow", 1);
             illuminated = true;
         }
 
         private void lightsOff() {
             //Switch off model lights
-            Utility.switchLight(this.part, "light-go", false);
+            Utility.switchEmissive(this, lightComponentOn, false);
+            //Utility.switchLight(this.part, "light-go", false);
             Utility.playAnimationSetToPosition(this.part, "glow", 0);
             illuminated = false;
         }
@@ -363,7 +381,7 @@ namespace Lib
             updateButtons();
         }
 
-        #endregion
+#endregion
     }
 }
 

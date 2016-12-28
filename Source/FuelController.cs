@@ -11,9 +11,9 @@ using System.Text;
 using UnityEngine;
 using KSP.IO;
 
-namespace km_Lib
+namespace Lib
 {
-    public class FuelController : PartModule
+    public class FuelController : SmartSensorModuleBase
     {
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Flow enabled")]
         bool flowEnabled = false;

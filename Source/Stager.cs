@@ -15,11 +15,11 @@ using KSP.UI;
 
 namespace Lib
 {
-    public class Stager : PartModule
+    public class Stager : SmartSensorModuleBase
     {
 
         #region Fields
-
+#if false
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group"),
             UI_ChooseOption(
                 options = new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16" },
@@ -57,6 +57,10 @@ namespace Lib
         [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Group:", guiFormat = "N0"),
             UI_FloatEdit(scene = UI_Scene.All, minValue = 1f, maxValue = 250f, incrementLarge = 75f, incrementSmall = 25f, incrementSlide = 1f)]
         public float agxGroupNum = 1;
+       [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Detection"),
+            UI_Toggle(disabledText = "Disabled", enabledText = "Enabled")]
+        public bool isArmed = true;
+#endif
 
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Resource"),
             UI_ChooseOption(
@@ -71,11 +75,7 @@ namespace Lib
             UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 100f, incrementSlide = 1f)]
         public float activationPercentage = 0;
 
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Detection"),
-            UI_Toggle(disabledText = "Disabled", enabledText = "Enabled")]
-        public bool isArmed = true;
-
-        [KSPAction("Activate Detection")]
+         [KSPAction("Activate Detection")]
         public void doActivateAG(KSPActionParam param) {
             isArmed = true;
         }
@@ -123,7 +123,7 @@ namespace Lib
         private string groupLastUpdate = "0"; //AGX: What was our selected group last update frame? Top slider.
         private double lastFill = 0; // save the last fill level when the tank drains
         private Boolean fireNextupdate = false;
-        private Boolean illuminated = false;
+      //  private Boolean illuminated = false;
 
         #endregion
 
@@ -148,6 +148,7 @@ namespace Lib
                 updateList();
             }
             updateButtons();
+            initLight(true, "light-go");
         }
 
         public override void OnUpdate() {
@@ -303,9 +304,10 @@ namespace Lib
 
         private void lightsOn() {
             //Switch off model lights
-            Utility.switchLight(this.part, "light-go", true);
+            Utility.switchEmissive(this, lightComponentOn, true);
+            //Utility.switchLight(this.part, "light-go", true);
             Utility.playAnimationSetToPosition(this.part, "glow", 1);
-            illuminated = true;
+          //  illuminated = true;
         }
 
 /*

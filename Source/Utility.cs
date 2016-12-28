@@ -17,16 +17,13 @@ namespace Lib
 
     public static class Utility
     {
-
-
-        public static void switchLight(Part p, String lightName, bool state) {
-            Transform lightTransform = p.FindModelTransform(lightName);
-            if (lightTransform != null) {
-                Light light = lightTransform.GetComponent<Light>();
-                if (light != null)
-                    light.intensity = (state ? 1 : 0);
-            }
-
+       
+        public static void switchEmissive(SmartSensorModuleBase baseM, Light light, bool state)
+        {
+            light.intensity = (state ? 1 : 0);
+            light.enabled = state;
+            light.enabled = true;
+            light.range = 0.25f;
         }
 
         private static void traverseChildren(Part p, int nextStage, ref List<Part> resultList) {

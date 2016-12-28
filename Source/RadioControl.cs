@@ -18,7 +18,7 @@ namespace Lib
         public static List<RadioControl> radioListeners = new List<RadioControl>();
     }
 
-    public class RadioControl : PartModule
+    public class RadioControl : SmartSensorModuleBase
     {
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Sync. Head."),
             UI_Toggle(disabledText = "Disabled", enabledText = "Enabled")]
@@ -28,6 +28,7 @@ namespace Lib
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Channel"), UI_FloatRange(minValue = 1f, maxValue = 20f, stepIncrement = 1f)]
         public float channel = 1;
 
+#if false
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group"),
             UI_ChooseOption(
             options = new String[] {
@@ -101,6 +102,7 @@ namespace Lib
         [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Group:", guiFormat = "N0"),
             UI_FloatEdit(scene = UI_Scene.All, minValue = 1f, maxValue = 250f, incrementLarge = 75f, incrementSmall = 25f, incrementSlide = 1f)]
         public float agxGroupNum = 1;
+#endif
 
         double fireTime = 0;
         double lightOnTime = 2;
@@ -326,14 +328,16 @@ namespace Lib
         }
 
         private void indicateSend() {
-            Utility.switchLight(this.part, "light-go", true);
+            Utility.switchEmissive(this, lightComponentOn, true);
+            //Utility.switchLight(this.part, "light-go", true);
             Utility.playAnimationSetToPosition(this.part, "glow", 1);
             fireTime = Time.fixedTime;
             print("Fire Time:" + fireTime);
         }
 
         private void indicateReceive(bool playSound) {
-            Utility.switchLight(this.part, "light-go", true);
+            Utility.switchEmissive(this, lightComponentOn, true);
+            //Utility.switchLight(this.part, "light-go", true);
             Utility.playAnimationSetToPosition(this.part, "glow", 1);
             fireTime = Time.fixedTime;
             if (playSound)
@@ -383,6 +387,7 @@ namespace Lib
                 }
             }
             updateButtons();
+            initLight(true, "light-go");
         }
 
 
@@ -395,7 +400,8 @@ namespace Lib
             updateCounter++;
 
             if (fireTime != 0 && fireTime + lightOnTime <= Time.time) {
-                Utility.switchLight(this.part, "light-go", false);
+                Utility.switchEmissive(this, lightComponentOn, false);
+                //Utility.switchLight(this.part, "light-go", false);
                 Utility.playAnimationSetToPosition(this.part, "glow", 0);
             }
 

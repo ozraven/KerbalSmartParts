@@ -14,14 +14,14 @@ namespace Lib
         public static List<ProxSensor> Listeners = new List<ProxSensor>();
     }
 
-    class ProxSensor : PartModule
+    class ProxSensor : SmartSensorModuleBase
     {
 
         #region Fields
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Channel"), UI_FloatRange(minValue = 1f, maxValue = 20f, stepIncrement = 1f)]
         public float channel = 1;
-
+#if false
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group"),
             UI_ChooseOption(
             options = new String[] {
@@ -65,11 +65,7 @@ namespace Lib
         )]
         public string group = "0";
 
-        [KSPField(isPersistant = true, guiActiveEditor = true, guiActive = true, guiName = "Distance", guiFormat = "F0", guiUnits = "m"),
-            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 2000f, incrementLarge = 250f, incrementSmall = 25f, incrementSlide = 1f)]
-        public float meterDistance = 0;
-
-        //AGXGroup shows if AGX installed and hides Group above
+         //AGXGroup shows if AGX installed and hides Group above
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false, guiName = "Group"),
             UI_ChooseOption(
             options = new String[] {
@@ -100,10 +96,6 @@ namespace Lib
             UI_FloatEdit(scene = UI_Scene.All, minValue = 1f, maxValue = 250f, incrementLarge = 75f, incrementSmall = 25f, incrementSlide = 1f)]
         public float agxGroupNum = 1;
 
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Trigger on"),
-            UI_ChooseOption(options = new string[] { "Both", "Approach", "Departure" })]
-        public string direction = "Both";
-
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Active"),
             UI_Toggle(disabledText = "False", enabledText = "True")]
         public bool isArmed = true;
@@ -111,6 +103,18 @@ namespace Lib
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Auto Reset"),
             UI_Toggle(disabledText = "False", enabledText = "True")]
         public bool autoReset = false;
+#endif
+
+        [KSPField(isPersistant = true, guiActiveEditor = true, guiActive = true, guiName = "Distance", guiFormat = "F0", guiUnits = "m"),
+     UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 2000f, incrementLarge = 250f, incrementSmall = 25f, incrementSlide = 1f)]
+        public float meterDistance = 0;
+
+
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Trigger on"),
+            UI_ChooseOption(options = new string[] { "Both", "Approach", "Departure" })]
+        public string direction = "Both";
+
+
 
         /* DEBUG CODE
         [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "Get Count")]
@@ -230,7 +234,8 @@ namespace Lib
 
         private void updateButtons() {
             //Change to AGX buttons if AGX installed
-            if (AGXInterface.AGExtInstalled()) {
+            if (AGXInterface.AGExtInstalled())
+            {
                 Fields["group"].guiActiveEditor = false;
                 Fields["group"].guiActive = false;
                 Fields["agxGroupType"].guiActiveEditor = true;
@@ -243,7 +248,8 @@ namespace Lib
                     Fields["agxGroupNum"].guiActive = true;
                     //Fields["agxGroupNum"].guiName = "Group:";
                 }
-                else {
+                else
+                {
                     Fields["agxGroupNum"].guiActiveEditor = false;
                     Fields["agxGroupNum"].guiActive = false;
                     //Fields["agxGroupNum"].guiName = "N/A";

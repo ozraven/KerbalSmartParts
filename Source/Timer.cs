@@ -15,10 +15,10 @@ using KSP.UI.Screens;
 
 namespace Lib
 {
-    public class Timer : PartModule
+    public class Timer : SmartSensorModuleBase
     {
         #region Fields
-
+#if false
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group"),
             UI_ChooseOption(
             options = new String[] {
@@ -92,7 +92,11 @@ namespace Lib
         [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Group:", guiFormat = "N0"),
             UI_FloatEdit(scene = UI_Scene.All, minValue = 1f, maxValue = 250f, incrementLarge = 75f, incrementSmall = 25f, incrementSlide = 1f)]
         public float agxGroupNum = 1;
-        
+
+        [KSPField(isPersistant = true)]
+        private Boolean isArmed = true;
+#endif
+
         // remember the time wehen the countdown was started
         [KSPField(isPersistant = true, guiActive = false)]
         private double triggerTime = 0;
@@ -116,8 +120,6 @@ namespace Lib
         [KSPField(isPersistant = true)]
         private Boolean useSeconds = true;
 
-        [KSPField(isPersistant = true)]
-        private Boolean armed = true;
 
         #endregion
 
@@ -183,8 +185,9 @@ namespace Lib
         #region Overrides
 
         public override void OnStart(StartState state) {
-            if(!armed){
-                Utility.switchLight(this.part, "light-go", true);
+            if(!isArmed){
+                Utility.switchEmissive(this, lightComponentOn, true);
+                //Utility.switchLight(this.part, "light-go", true);
                 Utility.playAnimationSetToPosition(this.part, "glow", 1);
                 this.part.stackIcon.SetIconColor(XKCDColors.Red);
             }
@@ -199,26 +202,28 @@ namespace Lib
             part.ActivatesEvenIfDisconnected = true;
             //Initial button layout
             updateButtons();
+            initLight(true, "light-go");
         }
 
         public override void OnActive() {
             //If staging enabled, set timer
-            if (allowStage && armed) {
+            if (allowStage && isArmed) {
                 setTimer();
             }
         }
 
         public override void OnUpdate() {
             //Check to see if the timer has been dragged in the staging list. If so, reset icon color
-            if (this.part.inverseStage != previousStage && allowStage && !armed && this.part.inverseStage + 1 < StageManager.CurrentStage) {
+            if (this.part.inverseStage != previousStage && allowStage && !isArmed && this.part.inverseStage + 1 < StageManager.CurrentStage) {
                 reset();
             }
             previousStage = this.part.inverseStage;
 
             //If the timer has been activated, start the countdown, activate the model's LED, and change the icon color
-            if (triggerTime > 0 && armed) {
+            if (triggerTime > 0 && isArmed) {
                 remainingTime = triggerTime + (useSeconds ? triggerDelaySeconds : triggerDelayMinutes * 60) - Planetarium.GetUniversalTime();
-                Utility.switchLight(this.part, "light-go", true);
+                Utility.switchEmissive(this, lightComponentOn, true);
+                //Utility.switchLight(this.part, "light-go", true);
                 Utility.playAnimationSetToPosition(this.part, "glow", 1);
                 this.part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
 
@@ -239,7 +244,7 @@ namespace Lib
                     triggerTime = 0;
                     remainingTime = 0;
                     //Disable timer until reset
-                    armed = false;
+                    isArmed = false;
                 }
             }
         }
@@ -293,7 +298,7 @@ namespace Lib
         }
 
         private void setTimer() {
-            if (armed) {
+            if (isArmed) {
                 //Set the trigger time, which will be caught in OnUpdate
                 triggerTime = Planetarium.GetUniversalTime();
                 print("Activating Timer: " + (useSeconds ? triggerDelaySeconds : triggerDelayMinutes * 60));
@@ -306,12 +311,13 @@ namespace Lib
             triggerTime = 0;
             remainingTime = 0;
             //Switch off model lights
-            Utility.switchLight(this.part, "light-go", false);
+            Utility.switchEmissive(this, lightComponentOn, false);
+            //Utility.switchLight(this.part, "light-go", false);
             Utility.playAnimationSetToPosition(this.part, "glow", 0);
             //Reset icon color to white
             this.part.stackIcon.SetIconColor(XKCDColors.White);
             //Reset armed variable
-            armed = true;
+            isArmed = true;
             //Reset activation status on part
             this.part.deactivate();
         }

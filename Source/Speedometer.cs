@@ -13,10 +13,11 @@ using KSP.IO;
 
 namespace Lib
 {
-    public class Speedometer : PartModule
+    public class Speedometer : SmartSensorModuleBase
     {
 
         #region Fields
+#if false
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group"),
             UI_ChooseOption(
             options = new String[] {
@@ -84,18 +85,24 @@ namespace Lib
         [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Group:", guiFormat = "N0"),
             UI_FloatEdit(scene = UI_Scene.All, minValue = 1f, maxValue = 250f, incrementLarge = 75f, incrementSmall = 25f, incrementSlide = 1f)]
         public float agxGroupNum = 1;
-        [KSPField(isPersistant = true, guiActiveEditor = true, guiActive = true, guiName = "Speed", guiFormat = "F0", guiUnits = "m/s"),
-            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 1000f, incrementLarge = 100f, incrementSmall = 10f, incrementSlide = 0.1f)]
-        public float meterPerSecondSpeed = 0;
+
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Active"),
             UI_Toggle(disabledText = "False", enabledText = "True")]
         public bool isArmed = true;
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Trigger on"),
-            UI_ChooseOption(options = new string[] { "All", "Increasing", "Decreasing" })]
-        public string direction = "All";
+
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Auto Reset"),
             UI_Toggle(disabledText = "False", enabledText = "True")]
         public bool autoReset = false;
+#endif
+
+        [KSPField(isPersistant = true, guiActiveEditor = true, guiActive = true, guiName = "Speed", guiFormat = "F0", guiUnits = "m/s"),
+            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 1000f, incrementLarge = 100f, incrementSmall = 10f, incrementSlide = 0.1f)]
+        public float meterPerSecondSpeed = 0;
+
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Trigger on"),
+            UI_ChooseOption(options = new string[] { "All", "Increasing", "Decreasing" })]
+        public string direction = "All";
+
         [KSPField(guiActive = true, guiName = "Speed")]
         public double speed;
         [KSPField(guiActive = true, guiName = "Last speed")]
@@ -156,6 +163,7 @@ namespace Lib
             this.part.force_activate();
             print("KM Speedometer Detector Started");
             updateButtons();
+            initLight(true, "light-go");
         }
 
         public override void OnUpdate()
@@ -265,7 +273,8 @@ namespace Lib
         private void lightsOn()
         {
             //Switch off model lights
-            Utility.switchLight(this.part, "light-go", true);
+            Utility.switchEmissive(this, lightComponentOn, true);
+            //Utility.switchLight(this.part, "light-go", true);
             Utility.playAnimationSetToPosition(this.part, "glow", 1);
             illuminated = true;
         }
@@ -273,7 +282,8 @@ namespace Lib
         private void lightsOff()
         {
             //Switch off model lights
-            Utility.switchLight(this.part, "light-go", false);
+            Utility.switchEmissive(this, lightComponentOn,false);
+            //Utility.switchLight(this.part, "light-go", false);
             Utility.playAnimationSetToPosition(this.part, "glow", 0);
             illuminated = false;
         }
