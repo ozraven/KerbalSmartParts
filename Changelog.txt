@@ -132,3 +132,8 @@ Taken over by LinuxGurugamer here
 	Redid code to enable lights
 	Added DPLD (Data-Packet Loss Detector) part
 	Added this Changelog.txt file
+
+1.9.4
+	Replaced stock logging with log class, reducing log spam
+	Added EC Level Detector
+	Added Resource Level Detector

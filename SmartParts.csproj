@@ -48,6 +48,7 @@
       <DependentUpon>AssemblyVersion.tt</DependentUpon>
     </Compile>
     <Compile Include="Source\DPLD.cs" />
+    <Compile Include="Source\Log.cs" />
     <Compile Include="Source\SmartSensorModule.cs" />
     <Compile Include="Source\Speedometer.cs" />
     <Compile Include="Source\FuelController.cs" />

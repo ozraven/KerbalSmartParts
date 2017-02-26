@@ -283,12 +283,12 @@ namespace Lib
 
 
             if (this == sender || channel != transmitChannel || this.vessel == FlightGlobals.ActiveVessel) {
-                MonoBehaviour.print("I am the active vessel or the sender or channels are not equal:" + channel + ", " + transmitChannel);
+                Log.Info("I am the active vessel or the sender or channels are not equal:" + channel + ", " + transmitChannel);
                 return;
             }
 
             this.vessel.ActionGroups.SetGroup(KSPActionGroup.SAS, true);
-            print("Listener:" + vessel.vesselName + "received command" + group);
+            Log.Info("Listener:" + vessel.vesselName + "received command" + group);
             this.vessel.Autopilot.SAS.LockRotation(targetUp);
             this.vessel.Autopilot.SAS.lockedMode = true;
             this.vessel.Autopilot.SAS.Update();
@@ -332,7 +332,7 @@ namespace Lib
             //Utility.switchLight(this.part, "light-go", true);
             Utility.playAnimationSetToPosition(this.part, "glow", 1);
             fireTime = Time.fixedTime;
-            print("Fire Time:" + fireTime);
+            Log.Info("Fire Time:" + fireTime);
         }
 
         private void indicateReceive(bool playSound) {
@@ -342,36 +342,36 @@ namespace Lib
             fireTime = Time.fixedTime;
             if (playSound)
                 Utility.playAudio(this.part, rcv_sound);
-            print("Fire Time:" + fireTime);
+            Log.Info("Fire Time:" + fireTime);
         }
 
         public void receiveCommand(RadioControl sender, int group, int transmitChannel, int agxGroup) //AGX Edited, agxGroup only used if AGX installed
         {
             if (this == sender || channel != transmitChannel) {
-                MonoBehaviour.print("I am the sender or channels are not equal:" + channel + ", " + transmitChannel);
+                Log.Info("I am the sender or channels are not equal:" + channel + ", " + transmitChannel);
                 return;
             }
-            print("Listener:" + vessel.vesselName + "received command" + group + "|" + agxGroup);
+            Log.Info("Listener:" + vessel.vesselName + "received command" + group + "|" + agxGroup);
             Helper.fireEvent(this.part, (int)group, (int)agxGroup);
             indicateReceive(true);
         }
 
         public void receiveThrottle(RadioControl sender, float throttle, int transmitChannel) {
             if (this == sender || channel != transmitChannel) {
-                MonoBehaviour.print("I am the sender or channels are not equal:" + channel + ", " + transmitChannel);
+                Log.Info("I am the sender or channels are not equal:" + channel + ", " + transmitChannel);
                 return;
             }
-            print("Listener:" + vessel.vesselName + "received command" + group);
+            Log.Info("Listener:" + vessel.vesselName + "received command" + group);
             this.vessel.ctrlState.mainThrottle = throttle;
             indicateReceive(true);
         }
 
         ~RadioControl() {
-            MonoBehaviour.print("Destructor called");
+            Log.Info("Destructor called");
         }
 
         public override void OnInactive() {
-            MonoBehaviour.print("OnInactive called");
+            Log.Info("OnInactive called");
             base.OnInactive();
         }
 
@@ -383,7 +383,7 @@ namespace Lib
                 Channel.radioListeners.Add(this);
                 foreach (var listener in Channel.radioListeners) {
                     if (listener.vessel != null)
-                        print("Listener found:" + listener.vessel.vesselName);
+                        Log.Info("Listener found:" + listener.vessel.vesselName);
                 }
             }
             updateButtons();
@@ -411,6 +411,7 @@ namespace Lib
 
         }
 
+        
         public void Update() //AGX: The OnUpdate above only seems to run in flight mode, Update() here runs in all scenes
         {
             if (agxGroupType == "1" & groupLastUpdate != "1" || agxGroupType != "1" & groupLastUpdate == "1") //AGX: Monitor group to see if we need to refresh window
@@ -418,25 +419,21 @@ namespace Lib
                 updateButtons();
                 refreshPartWindow();
                 if (agxGroupType == "1")
-                {
                     groupLastUpdate = "1";
-                }
                 else
-                {
                     groupLastUpdate = "0";
-                }
             }
         }
 
 
         public void OnDetach(bool first) {
             Channel.radioListeners.Remove(this);
-            MonoBehaviour.print("OnDetach");
+            Log.Info("OnDetach");
         }
 
         private void OnJustAboutToBeDestroyed() {
             Channel.radioListeners.Remove(this);
-            MonoBehaviour.print("OnJustAboutToBeDestroyed");
+            Log.Info("OnJustAboutToBeDestroyed");
         }
 
         private void updateButtons()
@@ -478,7 +475,7 @@ namespace Lib
         private void refreshPartWindow() //AGX: Refresh right-click part window to show/hide Groups slider
         {
             UIPartActionWindow[] partWins = FindObjectsOfType<UIPartActionWindow>();
-            //print("Wind count " + partWins.Count());
+            //Log.Info("Wind count " + partWins.Count());
             foreach (UIPartActionWindow partWin in partWins)
             {
                 partWin.displayDirty = true;

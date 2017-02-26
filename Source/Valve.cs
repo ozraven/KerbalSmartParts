@@ -92,7 +92,7 @@ namespace Lib
                 valveEffect.localVelocity.y = maxSpeedY * force / 100;
             }
             else {
-                print("Launch effect not found");
+                Log.Info("Launch effect not found");
             }
 
             if (state != StartState.Editor) {
@@ -109,7 +109,7 @@ namespace Lib
                     if (resource.resourceName == "ElectricCharge")
                         continue;
                     drainRatio.Add(resource.resourceName, (totalResourceAmount > 0 ? resource.maxAmount / totalResourceAmount : 0));
-                    print("Valve: Adding ressource:" + resource.resourceName + " DR:" + resource.maxAmount / totalResourceAmount);
+                    Log.Info("Valve: Adding ressource:" + resource.resourceName + " DR:" + resource.maxAmount / totalResourceAmount);
                 }
             }
         }

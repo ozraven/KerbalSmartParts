@@ -137,7 +137,7 @@ namespace Lib
         {
             if (part == null)
                 return;
-            Debug.Log("lightsOn");
+            Log.Info("lightsOn");
             Utility.switchEmissive(this, lightComponentOn, true);
             Utility.playAnimationSetToPosition(this.part, "glow", 1);
             illuminated = true;
@@ -147,7 +147,7 @@ namespace Lib
         {
             if (part == null)
                 return;
-            Debug.Log("lightsOff");
+            Log.Info("lightsOff");
             Utility.switchEmissive(this, lightComponentOn, false);
             Utility.playAnimationSetToPosition(this.part, "glow", 0);
             illuminated = false;

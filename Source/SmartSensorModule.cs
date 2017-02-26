@@ -117,7 +117,7 @@ namespace Lib
            Component[]  allComponents = part.gameObject.GetComponents<Highlighting.Highlighter>();
             foreach (var component  in allComponents)
             {
-                Debug.Log("light found: " + component.name);
+                Log.Info("light found: " + component.name);
                 var c = component as Highlighting.Highlighter;
                 c.ConstantOff();
 
@@ -126,19 +126,19 @@ namespace Lib
 
         protected void initLight(bool b, string lightName)
         {
-            Debug.Log("initLight:  b: " + b.ToString() + "   lightName: " + lightName);
+            Log.Info("initLight:  b: " + b.ToString() + "   lightName: " + lightName);
             displayAllComponents();
 
 
             Transform lightTransform = part.FindModelTransform(lightName);
             if (!lightTransform)
             {
-                Debug.Log("lightTransform: " + lightName + " not found");
+                Log.Info("lightTransform: " + lightName + " not found");
                 return;
             }
             if (b)
             {
-                Debug.Log("Creating gameObject");
+                Log.Info("Creating gameObject");
                 gameObjectOn = new GameObject("Light");
 
                 gameObjectOn.transform.parent = lightTransform.transform;
@@ -151,7 +151,7 @@ namespace Lib
             }
             else
             {
-                Debug.Log("Creating gameObject");
+                Log.Info("Creating gameObject");
                 gameObjectOff = new GameObject("Light");
 
                 gameObjectOff.transform.parent = lightTransform.transform;

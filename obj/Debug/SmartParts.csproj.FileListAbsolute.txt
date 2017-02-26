@@ -1,10 +1,5 @@
 D:\Users\jbb\github\KerbalSmartParts\bin\Debug\SmartParts.dll
 D:\Users\jbb\github\KerbalSmartParts\bin\Debug\SmartParts.pdb
-D:\Users\jbb\github\KerbalSmartParts\bin\Debug\TrackIRUnity.dll
-D:\Users\jbb\github\KerbalSmartParts\bin\Debug\System.Xml.dll
-D:\Users\jbb\github\KerbalSmartParts\bin\Debug\Mono.Cecil.dll
-D:\Users\jbb\github\KerbalSmartParts\bin\Debug\TDx.TDxInput.dll
-D:\Users\jbb\github\KerbalSmartParts\bin\Debug\UnityEngine.xml
 D:\Users\jbb\github\KerbalSmartParts\obj\Debug\SmartParts.dll
 D:\Users\jbb\github\KerbalSmartParts\obj\Debug\SmartParts.pdb
 D:\Users\jbb\github\KerbalSmartParts\obj\Debug\SmartParts.csprojResolveAssemblyReference.cache

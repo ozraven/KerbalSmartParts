@@ -127,46 +127,54 @@ namespace Lib
         #region Events
 
         [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Use Seconds")]
-        public void setSeconds() {
+        public void setSeconds()
+        {
             useSeconds = true;
             updateButtons();
         }
 
         [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Use Minutes")]
-        public void setMinutes() {
+        public void setMinutes()
+        {
             useSeconds = false;
             updateButtons();
         }
 
         [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Enable Staging")]
-        public void activateStaging() {
+        public void activateStaging()
+        {
             enableStaging();
         }
 
         [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Disable Staging")]
-        public void deactivateStaging() {
+        public void deactivateStaging()
+        {
             disableStaging();
         }
 
         [KSPEvent(guiName = "Start Countdown", guiActive = true)]
-        public void activateTimer() {
+        public void activateTimer()
+        {
             reset();
             setTimer();
         }
 
         [KSPAction("Start Countdown")]
-        public void activateTimerAG(KSPActionParam param) {
+        public void activateTimerAG(KSPActionParam param)
+        {
             reset();
             setTimer();
         }
 
         [KSPEvent(guiName = "Reset", guiActive = true)]
-        public void resetTimer() {
+        public void resetTimer()
+        {
             reset();
         }
 
         [KSPAction("Reset")]
-        public void resetTimerAG(KSPActionParam param) {
+        public void resetTimerAG(KSPActionParam param)
+        {
             reset();
         }
 
@@ -177,25 +185,29 @@ namespace Lib
 
         private int previousStage = 0;
         private string groupLastUpdate = "0"; //AGX: What was our selected group last update frame? Top slider.
-        
+
 
         #endregion
 
 
         #region Overrides
 
-        public override void OnStart(StartState state) {
-            if(!isArmed){
+        public override void OnStart(StartState state)
+        {
+            if (!isArmed)
+            {
                 Utility.switchEmissive(this, lightComponentOn, true);
                 //Utility.switchLight(this.part, "light-go", true);
                 Utility.playAnimationSetToPosition(this.part, "glow", 1);
                 this.part.stackIcon.SetIconColor(XKCDColors.Red);
             }
-            if (allowStage) {
+            if (allowStage)
+            {
                 Events["activateStaging"].guiActiveEditor = false;
                 Events["deactivateStaging"].guiActiveEditor = true;
             }
-            else {
+            else
+            {
                 Invoke("disableStaging", 0.25f);
             }
             GameEvents.onVesselChange.Add(onVesselChange);
@@ -205,22 +217,27 @@ namespace Lib
             initLight(true, "light-go");
         }
 
-        public override void OnActive() {
+        public override void OnActive()
+        {
             //If staging enabled, set timer
-            if (allowStage && isArmed) {
+            if (allowStage && isArmed)
+            {
                 setTimer();
             }
         }
 
-        public override void OnUpdate() {
+        public override void OnUpdate()
+        {
             //Check to see if the timer has been dragged in the staging list. If so, reset icon color
-            if (this.part.inverseStage != previousStage && allowStage && !isArmed && this.part.inverseStage + 1 < StageManager.CurrentStage) {
+            if (this.part.inverseStage != previousStage && allowStage && !isArmed && this.part.inverseStage + 1 < StageManager.CurrentStage)
+            {
                 reset();
             }
             previousStage = this.part.inverseStage;
 
             //If the timer has been activated, start the countdown, activate the model's LED, and change the icon color
-            if (triggerTime > 0 && isArmed) {
+            if (triggerTime > 0 && isArmed)
+            {
                 remainingTime = triggerTime + (useSeconds ? triggerDelaySeconds : triggerDelayMinutes * 60) - Planetarium.GetUniversalTime();
                 Utility.switchEmissive(this, lightComponentOn, true);
                 //Utility.switchLight(this.part, "light-go", true);
@@ -228,10 +245,11 @@ namespace Lib
                 this.part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
 
                 //Once the timer hits 0 activate the stage/AG, disable the model's LED, and change the icon color
-                if (remainingTime < 0) {
-                    print("Stage:" + Helper.KM_dictAGNames[int.Parse(group)]);
+                if (remainingTime < 0)
+                {
+                    Log.Info("Stage:" + Helper.KM_dictAGNames[int.Parse(group)]);
                     int groupToFire = 0; //AGX: need to send correct group
-                    if(AGXInterface.AGExtInstalled())
+                    if (AGXInterface.AGExtInstalled())
                     {
                         groupToFire = int.Parse(agxGroupType);
                     }
@@ -248,10 +266,10 @@ namespace Lib
                 }
             }
         }
-            public void Update() //AGX: The OnUpdate above only seems to run in flight mode, Update() here runs in all scenes
+        public void Update() //AGX: The OnUpdate above only seems to run in flight mode, Update() here runs in all scenes
+        {
+            if (agxGroupType == "1" & groupLastUpdate != "1" || agxGroupType != "1" & groupLastUpdate == "1") //AGX: Monitor group to see if we need to refresh window
             {
-                if (agxGroupType == "1" & groupLastUpdate != "1" || agxGroupType != "1" & groupLastUpdate == "1") //AGX: Monitor group to see if we need to refresh window
-                {
                 updateButtons();
                 refreshPartWindow();
                 if (agxGroupType == "1")
@@ -262,8 +280,8 @@ namespace Lib
                 {
                     groupLastUpdate = "0";
                 }
-                }
             }
+        }
 
         #endregion
 
@@ -271,13 +289,16 @@ namespace Lib
         #region Methods
 
 
-        public void onVesselChange(Vessel newVessel) {
-            if (newVessel == this.vessel && !allowStage) {
+        public void onVesselChange(Vessel newVessel)
+        {
+            if (newVessel == this.vessel && !allowStage)
+            {
                 Invoke("disableStaging", 0.25f);
             }
         }
 
-        private void enableStaging() {
+        private void enableStaging()
+        {
             part.stackIcon.CreateIcon();
             StageManager.Instance.SortIcons(true);
             allowStage = true;
@@ -287,7 +308,8 @@ namespace Lib
             Events["deactivateStaging"].guiActiveEditor = true;
         }
 
-        private void disableStaging() {
+        private void disableStaging()
+        {
             part.stackIcon.RemoveIcon();
             StageManager.Instance.SortIcons(true);
             allowStage = false;
@@ -297,16 +319,19 @@ namespace Lib
             Events["deactivateStaging"].guiActiveEditor = false;
         }
 
-        private void setTimer() {
-            if (isArmed) {
+        private void setTimer()
+        {
+            if (isArmed)
+            {
                 //Set the trigger time, which will be caught in OnUpdate
                 triggerTime = Planetarium.GetUniversalTime();
-                print("Activating Timer: " + (useSeconds ? triggerDelaySeconds : triggerDelayMinutes * 60));
+                Log.Info("Activating Timer: " + (useSeconds ? triggerDelaySeconds : triggerDelayMinutes * 60));
             }
         }
 
-        private void reset() {
-            print("Timer reset");
+        private void reset()
+        {
+            Log.Info("Timer reset");
             //Reset trigger and remaining time to 0
             triggerTime = 0;
             remainingTime = 0;
@@ -322,7 +347,8 @@ namespace Lib
             this.part.deactivate();
         }
 
-        private void updateButtons() {
+        private void updateButtons()
+        {
             if (useSeconds)
             {
                 //Show minute button
@@ -392,7 +418,8 @@ namespace Lib
             }
         }
 
-        private void onGUI() {
+        private void onGUI()
+        {
             //Update Buttons
             updateButtons();
         }
@@ -400,8 +427,8 @@ namespace Lib
         private void refreshPartWindow() //AGX: Refresh right-click part window to show/hide Groups slider
         {
             UIPartActionWindow[] partWins = FindObjectsOfType<UIPartActionWindow>();
-            //print("Wind count " + partWins.Count());
-            foreach(UIPartActionWindow partWin in partWins)
+            //Log.Info("Wind count " + partWins.Count());
+            foreach (UIPartActionWindow partWin in partWins)
             {
                 partWin.displayDirty = true;
             }

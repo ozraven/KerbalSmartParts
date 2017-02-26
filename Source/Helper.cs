@@ -70,7 +70,7 @@ namespace Lib
             if (p == null)
                 return;
             if (eventID == 0) {
-                MonoBehaviour.print("Fire Stage from part " + p);
+                Log.Info("Fire Stage from part " + p);
                 fireNextNonEmptyStage(p.vessel);
                 return;
             }
@@ -79,7 +79,7 @@ namespace Lib
                 AGXInterface.AGX2VslToggleGroup(p.vessel.rootPart.flightID, AGXgroup); //call to agx to activate group
             }
             else if (eventID > 0 && eventID <= maxEvent) {
-                MonoBehaviour.print("Fire Event " + KM_dictAGNames[eventID] + " from part " + p);
+                Log.Info("Fire Event " + KM_dictAGNames[eventID] + " from part " + p);
                 p.vessel.ActionGroups.ToggleGroup(KM_dictAG[eventID]);
             }
         }
@@ -92,7 +92,7 @@ namespace Lib
             traverseChildren(v.rootPart, highestNextStage, ref resultList);
 
             foreach (Part stageItem in resultList) {
-                MonoBehaviour.print("Activate:" + stageItem);
+                Log.Info("Activate:" + stageItem);
                 stageItem.activate(highestNextStage, stageItem.vessel);
                 stageItem.inverseStage = v.currentStage;
             }

@@ -19,48 +19,6 @@ namespace Lib
     {
 
         #region Fields
-#if false
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group"),
-            UI_ChooseOption(
-                options = new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16" },
-                display = new String[] { "Stage", "AG1", "AG2", "AG3", "AG4", "AG5", "AG6", "AG7", "AG8", "AG9", "AG10", "Lights", "RCS", "SAS", "Brakes", "Abort", "Gear" }
-            )]
-        public string group = "0";
-
-        //AGXGroup shows if AGX installed and hides Group above
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false, guiName = "Group"),
-            UI_ChooseOption(
-            options = new String[] {
-                "0",
-                "1",
-                "11",
-                "12",
-                "13",
-                "14",
-                "15",
-                "16"
-            },
-            display = new String[] {
-                "Stage",
-                "Action Group:",
-                "Lights",
-                "RCS",
-                "SAS",
-                "Brakes",
-                "Abort",
-                "Gear"
-            }
-        )]
-        public string agxGroupType = "0";
-
-        // AGX Action groups, use own slider if selected, only show this field if AGXGroup above is 1
-        [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Group:", guiFormat = "N0"),
-            UI_FloatEdit(scene = UI_Scene.All, minValue = 1f, maxValue = 250f, incrementLarge = 75f, incrementSmall = 25f, incrementSlide = 1f)]
-        public float agxGroupNum = 1;
-       [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Detection"),
-            UI_Toggle(disabledText = "Disabled", enabledText = "Enabled")]
-        public bool isArmed = true;
-#endif
 
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Resource"),
             UI_ChooseOption(
@@ -71,79 +29,107 @@ namespace Lib
         [KSPField(guiActive = true, guiActiveEditor = false, guiName = "Resource")]
         public String resourceFlightDisplay = "Empty";
 
+
+        [KSPField]
+        public bool forceSinglePart = true;
+
+        [KSPField]
+        public string resourceToMonitor = "";
+
+        public bool decreasing = true;
+        [KSPEvent(guiActiveEditor = true, active = true, guiName = "Trigger when Decreasing")]
+        public void setDecreasing()
+        {
+            decreasing = !decreasing;
+            if (decreasing)
+                Events["setDecreasing"].guiName = "Trigger when Decreasing";
+            else
+                Events["setDecreasing"].guiName = "Trigger when Increasing";
+        }
+
+        public enum monitoredParts { single, stage, vessel}
+
+
+        [KSPField(isPersistant = true)]
+        public monitoredParts singlePart = monitoredParts.single;
+
+        [KSPEvent(guiActiveEditor = true, active = true, guiName = "Single Part")]
+        public void setSinglePart()
+        {
+            switch (singlePart)
+            {
+                case monitoredParts.single:
+                    singlePart = monitoredParts.stage;
+                    Events["setSinglePart"].guiName = "Current Stage";
+                    break;
+                case monitoredParts.stage:
+                    singlePart = monitoredParts.vessel;
+                    Events["setSinglePart"].guiName = "Entire Ship";
+                    break;
+                case monitoredParts.vessel:
+                    singlePart = monitoredParts.single;
+                    Events["setSinglePart"].guiName = "Single Part";
+                    break;
+            }
+        }
+
+
+
+
+
+
         [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = true, guiName = "Percentage", guiFormat = "F0", guiUnits = "%"),
             UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 100f, incrementSlide = 1f)]
         public float activationPercentage = 0;
 
-         [KSPAction("Activate Detection")]
-        public void doActivateAG(KSPActionParam param) {
+        [KSPAction("Activate Detection")]
+        public void doActivateAG(KSPActionParam param)
+        {
             isArmed = true;
         }
 
         [KSPAction("Deactivate Detection")]
-        public void doDeActivateAG(KSPActionParam param) {
+        public void doDeActivateAG(KSPActionParam param)
+        {
             isArmed = false;
         }
 
-		#endregion
-		#if false
-		#region Events
-
-		void onDismiss()
-		{
-			print ("onDismiss");
-			Events ["ActivateEvent"].active = true;
-		}
-		void onAccept(string name, VesselType vt)
-		{
-			print ("name: " + name + "    VesselType: " + vt.ToString ());
-			FlightGlobals.ActiveVessel.vesselName = name;
-
-			print ("FlightGlobals.ActiveVessel.name: " + FlightGlobals.ActiveVessel.name);
-			Events ["ActivateEvent"].active = true;
-		}
-		[KSPEvent(active = true, guiActive = true, guiActiveEditor = true, guiName = "Name Cmd Part")]
-		public void ActivateEvent()
-		{
-			ScreenMessages.PostScreenMessage("Clicked Activate", 5.0f, ScreenMessageStyle.UPPER_CENTER);
-
-			// This will hide the Activate event, and show the Deactivate event.
-			Events["ActivateEvent"].active = false;
-			//Events["DeactivateEvent"].active = true;
-
-			KSP.UI.Screens.VesselRenameDialog.Spawn(FlightGlobals.ActiveVessel, onAccept, onDismiss, true, VesselType.Probe);
-
-		}
-		#endregion
-		#endif
+        #endregion
 
         #region Variables
 
         private Part observedPart = null;
         private string groupLastUpdate = "0"; //AGX: What was our selected group last update frame? Top slider.
-        private double lastFill = 0; // save the last fill level when the tank drains
+        private double lastFill = -1; // save the last fill level when the tank drains
         private Boolean fireNextupdate = false;
-      //  private Boolean illuminated = false;
+        //  private Boolean illuminated = false;
 
         #endregion
 
         #region Overrides
 
-        public override void OnStart(StartState state) {
-            if (state == StartState.Editor) {
-                this.part.OnEditorAttach += OnEditorAttach;
+        public override void OnStart(StartState state)
+        {
+            if (state == StartState.Editor)
+            {
+                this.part.OnEditorAttach += OnEditorAttach;                
             }
-            print("KM Stager Started");
+            Log.Info("KM Stager Started");
+           
+
+
             //Force activation no matter which stage it's on
             this.part.force_activate();
             //Find which part we should be monitoring in flight
-            if (HighLogic.LoadedSceneIsFlight) {
+            if (HighLogic.LoadedSceneIsFlight)
+            {
                 findObservedPart();
                 //Update static resource flight display with correct resource name
                 resourceFlightDisplay = monitoredResource;
             }
             //Find which part we should be monitoring, and update the fuel list in the editor
-            if (HighLogic.LoadedSceneIsEditor && this.part.parent != null) {
+            if (HighLogic.LoadedSceneIsEditor && this.part.parent != null)
+            {
                 findObservedPart();
                 updateList();
             }
@@ -151,35 +137,180 @@ namespace Lib
             initLight(true, "light-go");
         }
 
-        public override void OnUpdate() {
+        public override void OnUpdate()
+        {
             //In order for physics to take effect on jettisoned parts, the staging event has to be fired from OnUpdate
-            if (fireNextupdate) {
+            if (fireNextupdate)
+            {
                 fireAction();
                 fireNextupdate = false;
             }
         }
 
-        public override void OnAwake() {
+        public override void OnAwake()
+        {
         }
 
-        public override void OnFixedUpdate() {
-            if (isArmed && observedPart != null && monitoredResource != "Empty") {
-                //Check fuel percantage and compare it to target percentage
-                //If target is 0%, rounding errors can prevent firing. Run special check to prevent this
-                if (activationPercentage == 0 && (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) <= 1) && observedPart.Resources[monitoredResource].amount == lastFill) {
-                    fireNextupdate = true;
+        double totalVesselAmount = 0;
+        double maxVesselAmount = 0;
+
+        //
+        // The following 3 functions were copied from the KSPAlternateResourcePanel
+        // and are covered by the MIT license
+        //
+
+        /// <summary>
+        /// Worker to find the decoupled at value
+        /// </summary>
+        /// <returns>Stage at which part will be decoupled. Returns -1 if the part will never be decoupled from the vessel</returns>
+        Int32 CalcDecoupleStage(Part pTest)
+        {
+            Int32 stageOut = -1;
+
+            //Is this part a decoupler
+            if (pTest.Modules.OfType<ModuleDecouple>().Count() > 0 || pTest.Modules.OfType<ModuleAnchoredDecoupler>().Count() > 0)
+            {
+                stageOut = pTest.inverseStage;
+            }
+            //if not look further up the vessel tree
+            else if (pTest.parent != null)
+            {
+                stageOut = CalcDecoupleStage(pTest.parent);
+            }
+            return stageOut;
+        }
+
+        /// <summary>
+        /// Returns the Stage number at which this part will be separated from the vehicle.
+        /// </summary>
+        /// <param name="p">Part to Check</param>
+        /// <returns>Stage at which part will be decoupled. Returns -1 if the part will never be decoupled from the vessel</returns>
+        Int32 DecoupledAt(Part p)
+        {
+            return CalcDecoupleStage(p);
+        }
+
+        /// <summary>
+        /// Should be self explanatory
+        /// </summary>
+        /// <param name="Parts"></param>
+        /// <returns>Largest Stage # in Parts list</returns>
+        Int32 GetLastStage(List<Part> Parts)
+        {
+            if (Parts.Count > 0)
+                return Parts.Max(x => DecoupledAt(x));
+            else return -1;
+        }
+
+        Int32 LastStage = 0;
+
+        void getVesselResource()
+        {
+             totalVesselAmount = 0;
+             maxVesselAmount = 0;
+            
+            if (singlePart == monitoredParts.stage)
+                LastStage = GetLastStage(vessel.parts);
+            
+            foreach (var p in this.vessel.parts)
+            {
+                if (singlePart == monitoredParts.stage && DecoupledAt(p) != LastStage)
+                    continue;
+                PartResource pr = p.Resources.Where(i => i.resourceName == monitoredResource).FirstOrDefault();
+                if (pr != null)
+                {
+                    totalVesselAmount += pr.amount;
+                    maxVesselAmount += pr.maxAmount;
                 }
-                //Once target percentage is hit, fire the action
-                else if (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) <= activationPercentage) {
-                    fireNextupdate = true;
+            }
+        }
+
+        public override void OnFixedUpdate()
+        {
+            if (isArmed && observedPart != null && monitoredResource != "Empty")
+            {
+                Log.Info("OnFixedUpdate, singlePart");
+                if (lastFill >= 0)
+                {
+                    if (singlePart == monitoredParts.single)
+                    {
+                        if (decreasing)
+                        {
+                           
+                            //Check fuel percantage and compare it to target percentage
+                            //If target is 0%, rounding errors can prevent firing. Run special check to prevent this
+                            if (activationPercentage == 0 && (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) <= 1) && observedPart.Resources[monitoredResource].amount == lastFill)
+                            {
+                                fireNextupdate = true;
+                            }
+                            //Once target percentage is hit, fire the action
+                            else if (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) <= activationPercentage)
+                            {
+                                fireNextupdate = true;
+                            }
+                        }
+                        else
+                        {
+                            //Check fuel percantage and compare it to target percentage
+                            //If target is 100%, rounding errors can prevent firing. Run special check to prevent this
+                            if (activationPercentage == 100 && (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) >= 99) && observedPart.Resources[monitoredResource].amount == lastFill)
+                            {
+                                fireNextupdate = true;
+                            }
+                            //Once target percentage is hit, fire the action
+                            else if (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) >= activationPercentage)
+                            {
+                                fireNextupdate = true;
+                            }
+                        }
+                    }
+                    //Update last fill amount
+                    lastFill = observedPart.Resources[monitoredResource].amount;
                 }
-                //Update last fill amount
-                lastFill = observedPart.Resources[monitoredResource].amount;
+                else
+                {
+                    Log.Info("OnFixedUpdate, entire ship");
+                    getVesselResource();
+                    if (lastFill >= 0)
+                    {
+                        if (decreasing)
+                        {
+                            //Check fuel percantage and compare it to target percentage
+                            //If target is 0%, rounding errors can prevent firing. Run special check to prevent this
+                            if (activationPercentage == 0 && (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) <= 1) && observedPart.Resources[monitoredResource].amount == lastFill)
+                            {
+                                fireNextupdate = true;
+                            }
+                            //Once target percentage is hit, fire the action
+                            else if (((totalVesselAmount / maxVesselAmount) * 100) <= activationPercentage)
+                            {
+                                fireNextupdate = true;
+                            }
+                        }
+                        else
+                        {
+                            //Check fuel percantage and compare it to target percentage
+                            //If target is 100%, rounding errors can prevent firing. Run special check to prevent this
+                            if (activationPercentage == 100 && (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) >= 99) && observedPart.Resources[monitoredResource].amount == lastFill)
+                            {
+                                fireNextupdate = true;
+                            }
+                            //Once target percentage is hit, fire the action
+                            else if (((totalVesselAmount / maxVesselAmount) * 100) >= activationPercentage)
+                            {
+                                fireNextupdate = true;
+                            }
+                        }
+                    }
+                    //Update last fill amount
+                    lastFill = totalVesselAmount;
+                }
             }
 
         }
 
-        public void Update() {
+        public void Update()
+        {
             //AGX: The OnUpdate above only seems to run in flight mode, Update() here runs in all scenes
             if (agxGroupType == "1" & groupLastUpdate != "1" || agxGroupType != "1" & groupLastUpdate == "1") //AGX: Monitor group to see if we need to refresh window
             {
@@ -195,13 +326,18 @@ namespace Lib
                 }
             }
         }
-        public override string GetInfo() {
+        public override string GetInfo()
+        {
             return "Built-in auto staging smart part";
         }
 
         private void updateButtons()
         {
-            
+            if (forceSinglePart)
+            {
+                Events["setSinglePart"].active = false;               
+            }
+
             //Change to AGX buttons if AGX installed
             if (AGXInterface.AGExtInstalled())
             {
@@ -239,7 +375,7 @@ namespace Lib
         private void refreshPartWindow() //AGX: Refresh right-click part window to show/hide Groups slider
         {
             UIPartActionWindow[] partWins = FindObjectsOfType<UIPartActionWindow>();
-            //print("Wind count " + partWins.Count());
+            //Log.Info("Wind count " + partWins.Count());
             foreach (UIPartActionWindow partWin in partWins)
             {
                 partWin.displayDirty = true;
@@ -250,43 +386,62 @@ namespace Lib
 
         #region Methods
 
-        private void fireAction() {
+        private void fireAction()
+        {
             int groupToFire = 0; //AGX: need to send correct group
-            if (AGXInterface.AGExtInstalled()) {
+            if (AGXInterface.AGExtInstalled())
+            {
                 groupToFire = int.Parse(agxGroupType);
             }
-            else {
+            else
+            {
                 groupToFire = int.Parse(group);
             }
             Helper.fireEvent(this.part, groupToFire, (int)agxGroupNum);
             lightsOn();
-            print("KM Stager: Target percentage hit");
+            Log.Info("KM Stager: Target percentage hit");
             isArmed = false;
         }
 
-        private void findObservedPart() {
+        private void findObservedPart()
+        {
             //If this is a smart fuel tank, monitor self
-            if (this.part.Resources.Count > 0) {
-                print("KM Stager: Monitoring this part");
+            if (this.part.Resources.Count > 0)
+            {
+                Log.Info("KM Stager: Monitoring this part");
                 observedPart = this.part;
             }
             //Otherwise monitor the parent part
-            else {
-                print("KM Stager: Monitoring parent part");
+            else
+            {
+                Log.Info("KM Stager: Monitoring parent part");
                 observedPart = this.part.parent;
             }
-            print("KM Stager: Set observed part to " + observedPart.partName + "Active is: " + isArmed);
+            Log.Info("KM Stager: Set observed part to " + observedPart.partName + "Active is: " + isArmed);
         }
 
-        private void updateList() {
+        private void updateList()
+        {
+            Log.Info("updateList, resource: " + resourceToMonitor);
+            
+
+            if (resourceToMonitor != "")
+            {
+                monitoredResource = resourceToMonitor;
+                Fields["monitoredResource"].guiActiveEditor = false;
+                return;
+            }
             //Create temporary string list to collect resources
             List<string> resourceList = new List<string>();
             //Instantiate monitoredResource options so we can access its option array
             UI_ChooseOption resourceOptions = (UI_ChooseOption)Fields["monitoredResource"].uiControlEditor;
-            if (observedPart != null) {
-                if (observedPart.Resources.Count > 0) {
+            if (observedPart != null)
+            {
+                if (observedPart.Resources.Count > 0)
+                {
                     //Iterate through resources and add them to the resourceList
-                    foreach (PartResource resource in observedPart.Resources) {
+                    foreach (PartResource resource in observedPart.Resources)
+                    {
                         resourceList.Add(resource.resourceName);
                     }
                     //Convert resource list to array and assign it to the monitoredResource options
@@ -294,7 +449,8 @@ namespace Lib
                     //If we already have selected a resource, don't reassign it to the default
                     monitoredResource = (resourceList.Contains(monitoredResource) ? monitoredResource : resourceList[0]);
                 }
-                else {
+                else
+                {
                     //If there are no resources in the monitored part, set monitoredResource to "Empty"
                     resourceOptions.options = new string[] { "Empty" };
                     monitoredResource = "Empty";
@@ -302,23 +458,25 @@ namespace Lib
             }
         }
 
-        private void lightsOn() {
+        private void lightsOn()
+        {
             //Switch off model lights
             Utility.switchEmissive(this, lightComponentOn, true);
             //Utility.switchLight(this.part, "light-go", true);
             Utility.playAnimationSetToPosition(this.part, "glow", 1);
-          //  illuminated = true;
+            //  illuminated = true;
         }
 
-/*
-        private void changeListener() {
-            print("KM Stager: Monitored part resoruces changed. Updating.");
-            findObservedPart();
-            updateList();
-        }
-*/
+        /*
+                private void changeListener() {
+                    Log.Info("KM Stager: Monitored part resoruces changed. Updating.");
+                    findObservedPart();
+                    updateList();
+                }
+        */
 
-        private void OnEditorAttach() {
+        private void OnEditorAttach()
+        {
             findObservedPart();
             updateList();
         }
