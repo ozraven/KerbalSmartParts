@@ -211,49 +211,53 @@ namespace Lib
             else return -1;
         }
 
-        Int32 LastStage = 0;
-
         void getVesselResource()
         {
             totalVesselAmount = 0;
             maxVesselAmount = 0;
 
             if (singlePart == monitoredParts.stage)
-                LastStage = GetLastStage(vessel.parts);
-
-            foreach (var p in this.vessel.parts)
             {
-                if (singlePart == monitoredParts.stage && CalcDecoupleStage(p) != LastStage)
-                    continue;
-                PartResource pr = p.Resources.Where(i => i.resourceName == monitoredResource).FirstOrDefault();
-                if (pr != null)
+                int LastStage = GetLastStage(vessel.Parts);
+                foreach (var p in vessel.parts.Where(x => x.inverseStage == LastStage))
                 {
-                    totalVesselAmount += pr.amount;
-                    maxVesselAmount += pr.maxAmount;
+                    PartResource pr = p.Resources.Where(i => i.resourceName == monitoredResource).FirstOrDefault();
+                    if (pr != null)
+                    {
+                        totalVesselAmount += pr.amount;
+                        maxVesselAmount += pr.maxAmount;
+                    }
+                }
+            }
+            else
+            {
+                foreach (var p in vessel.parts)
+                {
+                    PartResource pr = p.Resources.Where(i => i.resourceName == monitoredResource).FirstOrDefault();
+                    if (pr != null)
+                    {
+                        totalVesselAmount += pr.amount;
+                        maxVesselAmount += pr.maxAmount;
+                    }
                 }
             }
         }
 
         public override void OnFixedUpdate()
         {
-            if (isArmed && observedPart != null && monitoredResource != "Empty")
+            if (isArmed && monitoredResource != "Empty")
             {
-                Log.Info("OnFixedUpdate, singlePart");
-                if (lastFill >= 0)
+                if (singlePart == monitoredParts.single && observedPart != null)
                 {
-                    if (singlePart == monitoredParts.single)
+                    if (lastFill >= 0)
                     {
+                        Log.Info("OnFixedUpdate, singlePart");
                         if (decreasing)
                         {
-
-                            //Check fuel percantage and compare it to target percentage
-                            //If target is 0%, rounding errors can prevent firing. Run special check to prevent this
-                            if (activationPercentage == 0 && (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) <= 1) && observedPart.Resources[monitoredResource].amount == lastFill)
-                            {
-                                fireNextupdate = true;
-                            }
                             //Once target percentage is hit, fire the action
-                            else if (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) <= activationPercentage)
+                            //Make sure it's decresing
+                            if (observedPart.Resources[monitoredResource].amount < lastFill &&
+                                ((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100.0) <= activationPercentage)
                             {
                                 fireNextupdate = true;
                                 isArmed = false;
@@ -262,14 +266,10 @@ namespace Lib
                         }
                         else
                         {
-                            //Check fuel percantage and compare it to target percentage
-                            //If target is 100%, rounding errors can prevent firing. Run special check to prevent this
-                            if (activationPercentage == 100 && (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) >= 99) && observedPart.Resources[monitoredResource].amount == lastFill)
-                            {
-                                fireNextupdate = true;
-                            }
                             //Once target percentage is hit, fire the action
-                            else if (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) >= activationPercentage)
+                            //Make sure it's increasing
+                            if (observedPart.Resources[monitoredResource].amount > lastFill &&
+                                ((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100.0) >= activationPercentage)
                             {
                                 fireNextupdate = true;
                                 isArmed = false;
@@ -282,20 +282,15 @@ namespace Lib
                 }
                 else
                 {
-                    Log.Info("OnFixedUpdate, entire ship");
+                    Log.Info(string.Format("OnFixedUpdate, {0}", singlePart == monitoredParts.stage ? "current stage" : "entire ship"));
                     getVesselResource();
                     if (lastFill >= 0)
                     {
                         if (decreasing)
                         {
-                            //Check fuel percantage and compare it to target percentage
-                            //If target is 0%, rounding errors can prevent firing. Run special check to prevent this
-                            if (activationPercentage == 0 && (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) <= 1) && observedPart.Resources[monitoredResource].amount == lastFill)
-                            {
-                                fireNextupdate = true;
-                            }
                             //Once target percentage is hit, fire the action
-                            else if (((totalVesselAmount / maxVesselAmount) * 100) <= activationPercentage)
+                            //Make sure it's in decresing direction
+                            if (totalVesselAmount < lastFill && ((totalVesselAmount / maxVesselAmount) * 100.0) <= activationPercentage)
                             {
                                 fireNextupdate = true;
                                 isArmed = false;
@@ -304,14 +299,9 @@ namespace Lib
                         }
                         else
                         {
-                            //Check fuel percantage and compare it to target percentage
-                            //If target is 100%, rounding errors can prevent firing. Run special check to prevent this
-                            if (activationPercentage == 100 && (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) >= 99) && observedPart.Resources[monitoredResource].amount == lastFill)
-                            {
-                                fireNextupdate = true;
-                            }
                             //Once target percentage is hit, fire the action
-                            else if (((totalVesselAmount / maxVesselAmount) * 100) >= activationPercentage)
+                            //Make sure it's in increasing direction
+                            if (totalVesselAmount > lastFill && ((totalVesselAmount / maxVesselAmount) * 100.0) >= activationPercentage)
                             {
                                 fireNextupdate = true;
                                 isArmed = false;
