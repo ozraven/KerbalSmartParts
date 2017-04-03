@@ -41,7 +41,9 @@ namespace Lib
         [KSPField]
         public string resourceToMonitor = "";
 
+        [KSPField(isPersistant = true)]
         public bool decreasing = true;
+
         [KSPEvent(guiActiveEditor = true, active = true, guiName = "Trigger when Decreasing")]
         public void setDecreasing()
         {
