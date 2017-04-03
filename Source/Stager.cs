@@ -325,6 +325,11 @@ namespace Lib
                     lastFill = totalVesselAmount;
                 }
             }
+            // Only rearm if disarmed and not ready to fire on next update
+            if (!isArmed && !fireNextupdate && autoReset)
+            {
+                isArmed = true;
+            }
 
         }
 
