@@ -162,7 +162,6 @@ namespace Lib
             if (fireNextupdate)
             {
                 fireAction();
-                fireNextupdate = false;
             }
         }
 
@@ -257,6 +256,8 @@ namespace Lib
                             else if (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) <= activationPercentage)
                             {
                                 fireNextupdate = true;
+                                isArmed = false;
+                                Log.Info("KM Stager: Target percentage hit, resource level was decreasing");
                             }
                         }
                         else
@@ -271,6 +272,8 @@ namespace Lib
                             else if (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) >= activationPercentage)
                             {
                                 fireNextupdate = true;
+                                isArmed = false;
+                                Log.Info("KM Stager: Target percentage hit, resource level was increasing");
                             }
                         }
                     }
@@ -295,6 +298,8 @@ namespace Lib
                             else if (((totalVesselAmount / maxVesselAmount) * 100) <= activationPercentage)
                             {
                                 fireNextupdate = true;
+                                isArmed = false;
+                                Log.Info("KM Stager: Target percentage hit, resource level was decreasing");
                             }
                         }
                         else
@@ -309,6 +314,8 @@ namespace Lib
                             else if (((totalVesselAmount / maxVesselAmount) * 100) >= activationPercentage)
                             {
                                 fireNextupdate = true;
+                                isArmed = false;
+                                Log.Info("KM Stager: Target percentage hit, resource level was increasing");
                             }
                         }
                     }
@@ -431,9 +438,8 @@ namespace Lib
                 groupToFire = int.Parse(group);
             }
             Helper.fireEvent(this.part, groupToFire, (int)agxGroupNum);
+            fireNextupdate = false;
             lightsOn();
-            Log.Info("KM Stager: Target percentage hit");
-            isArmed = false;
         }
 
         private void findObservedPart()
