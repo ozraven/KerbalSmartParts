@@ -29,6 +29,11 @@ namespace Lib
         [KSPField(guiActive = true, guiActiveEditor = false, guiName = "Resource")]
         public String resourceFlightDisplay = "Empty";
 
+        [KSPField(guiActive = true, guiActiveEditor = false, guiName = "Trigger when")]
+        public string triggerFlightDisplay = "Decreasing";
+
+        [KSPField(guiActive = true, guiActiveEditor = false, guiName = "Monitor")]
+        public string monitorFlightDisplay = "Single Part";
 
         [KSPField]
         public bool forceSinglePart = true;
@@ -124,8 +129,21 @@ namespace Lib
             if (HighLogic.LoadedSceneIsFlight)
             {
                 findObservedPart();
-                //Update static resource flight display with correct resource name
+                //Update static flight displays with correct values
                 resourceFlightDisplay = monitoredResource;
+                triggerFlightDisplay = decreasing ? "Decreasing" : "Increasing";
+                switch (singlePart)
+                {
+                    case monitoredParts.single:
+                        monitorFlightDisplay = "Single Part";
+                        break;
+                    case monitoredParts.stage:
+                        monitorFlightDisplay = "Current Stage";
+                        break;
+                    case monitoredParts.vessel:
+                        monitorFlightDisplay = "Entire Ship";
+                        break;
+                }
             }
             //Find which part we should be monitoring, and update the fuel list in the editor
             if (HighLogic.LoadedSceneIsEditor && this.part.parent != null)
