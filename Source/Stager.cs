@@ -389,6 +389,24 @@ namespace Lib
                 Fields["agxGroupNum"].guiActiveEditor = false;
                 Fields["agxGroupNum"].guiActive = false;
             }
+
+            if (decreasing)
+                Events["setDecreasing"].guiName = "Trigger when Decreasing";
+            else
+                Events["setDecreasing"].guiName = "Trigger when Increasing";
+
+            switch (singlePart)
+            {
+                case monitoredParts.single:
+                    Events["setSinglePart"].guiName = "Single Part";
+                    break;
+                case monitoredParts.stage:
+                    Events["setSinglePart"].guiName = "Current Stage";
+                    break;
+                case monitoredParts.vessel:
+                    Events["setSinglePart"].guiName = "Entire Ship";
+                    break;
+            }
         }
 
         private void refreshPartWindow() //AGX: Refresh right-click part window to show/hide Groups slider
