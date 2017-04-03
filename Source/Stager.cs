@@ -54,7 +54,7 @@ namespace Lib
                 Events["setDecreasing"].guiName = "Trigger when Increasing";
         }
 
-        public enum monitoredParts { single, stage, vessel}
+        public enum monitoredParts { single, stage, vessel }
 
 
         [KSPField(isPersistant = true)]
@@ -80,11 +80,6 @@ namespace Lib
             }
         }
 
-
-
-
-
-
         [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = true, guiName = "Percentage", guiFormat = "F0", guiUnits = "%"),
             UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 100f, incrementSlide = 1f)]
         public float activationPercentage = 0;
@@ -108,8 +103,8 @@ namespace Lib
         private Part observedPart = null;
         private string groupLastUpdate = "0"; //AGX: What was our selected group last update frame? Top slider.
         private double lastFill = -1; // save the last fill level when the tank drains
-        private Boolean fireNextupdate = false;
-        //  private Boolean illuminated = false;
+        private bool fireNextupdate = false;
+        private bool illuminated = false;
 
         #endregion
 
@@ -119,10 +114,10 @@ namespace Lib
         {
             if (state == StartState.Editor)
             {
-                this.part.OnEditorAttach += OnEditorAttach;                
+                this.part.OnEditorAttach += OnEditorAttach;
             }
             Log.Info("KM Stager Started");
-           
+
 
 
             //Force activation no matter which stage it's on
@@ -159,6 +154,10 @@ namespace Lib
 
         public override void OnUpdate()
         {
+            if (isArmed && illuminated)
+            {
+                lightsOff();
+            }
             //In order for physics to take effect on jettisoned parts, the staging event has to be fired from OnUpdate
             if (fireNextupdate)
             {
@@ -226,12 +225,12 @@ namespace Lib
 
         void getVesselResource()
         {
-             totalVesselAmount = 0;
-             maxVesselAmount = 0;
-            
+            totalVesselAmount = 0;
+            maxVesselAmount = 0;
+
             if (singlePart == monitoredParts.stage)
                 LastStage = GetLastStage(vessel.parts);
-            
+
             foreach (var p in this.vessel.parts)
             {
                 if (singlePart == monitoredParts.stage && DecoupledAt(p) != LastStage)
@@ -256,7 +255,7 @@ namespace Lib
                     {
                         if (decreasing)
                         {
-                           
+
                             //Check fuel percantage and compare it to target percentage
                             //If target is 0%, rounding errors can prevent firing. Run special check to prevent this
                             if (activationPercentage == 0 && (((observedPart.Resources[monitoredResource].amount / observedPart.Resources[monitoredResource].maxAmount) * 100) <= 1) && observedPart.Resources[monitoredResource].amount == lastFill)
@@ -355,7 +354,7 @@ namespace Lib
         {
             if (forceSinglePart)
             {
-                Events["setSinglePart"].active = false;               
+                Events["setSinglePart"].active = false;
             }
 
             //Change to AGX buttons if AGX installed
@@ -443,7 +442,6 @@ namespace Lib
         private void updateList()
         {
             Log.Info("updateList, resource: " + resourceToMonitor);
-            
 
             if (resourceToMonitor != "")
             {
@@ -480,11 +478,20 @@ namespace Lib
 
         private void lightsOn()
         {
-            //Switch off model lights
+            //Switch on model lights
             Utility.switchEmissive(this, lightComponentOn, true);
             //Utility.switchLight(this.part, "light-go", true);
             Utility.playAnimationSetToPosition(this.part, "glow", 1);
-            //  illuminated = true;
+            illuminated = true;
+        }
+
+        private void lightsOff()
+        {
+            //Switch off model lights
+            Utility.switchEmissive(this, lightComponentOn, false);
+            //Utility.switchLight(this.part, "light-go", false);
+            Utility.playAnimationSetToPosition(this.part, "glow", 0);
+            illuminated = false;
         }
 
         /*
