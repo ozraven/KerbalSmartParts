@@ -186,8 +186,9 @@ namespace Lib
         {
             Int32 stageOut = -1;
 
-            //Is this part a decoupler
-            if (pTest.Modules.OfType<ModuleDecouple>().Count() > 0 || pTest.Modules.OfType<ModuleAnchoredDecoupler>().Count() > 0)
+            //Is this part an armed decoupler?
+            if ((pTest.Modules.OfType<ModuleDecouple>().Count() > 0 && !pTest.Modules.GetModule<ModuleDecouple>().isDecoupled) ||
+                (pTest.Modules.OfType<ModuleAnchoredDecoupler>().Count() > 0 && !pTest.Modules.GetModule<ModuleAnchoredDecoupler>().isDecoupled))
             {
                 stageOut = pTest.inverseStage;
             }
