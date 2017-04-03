@@ -174,7 +174,7 @@ namespace Lib
         double maxVesselAmount = 0;
 
         //
-        // The following 3 functions were copied from the KSPAlternateResourcePanel
+        // The following 2 functions were copied from the KSPAlternateResourcePanel
         // and are covered by the MIT license
         //
 
@@ -201,16 +201,6 @@ namespace Lib
         }
 
         /// <summary>
-        /// Returns the Stage number at which this part will be separated from the vehicle.
-        /// </summary>
-        /// <param name="p">Part to Check</param>
-        /// <returns>Stage at which part will be decoupled. Returns -1 if the part will never be decoupled from the vessel</returns>
-        Int32 DecoupledAt(Part p)
-        {
-            return CalcDecoupleStage(p);
-        }
-
-        /// <summary>
         /// Should be self explanatory
         /// </summary>
         /// <param name="Parts"></param>
@@ -218,7 +208,7 @@ namespace Lib
         Int32 GetLastStage(List<Part> Parts)
         {
             if (Parts.Count > 0)
-                return Parts.Max(x => DecoupledAt(x));
+                return Parts.Max(x => CalcDecoupleStage(x));
             else return -1;
         }
 
@@ -234,7 +224,7 @@ namespace Lib
 
             foreach (var p in this.vessel.parts)
             {
-                if (singlePart == monitoredParts.stage && DecoupledAt(p) != LastStage)
+                if (singlePart == monitoredParts.stage && CalcDecoupleStage(p) != LastStage)
                     continue;
                 PartResource pr = p.Resources.Where(i => i.resourceName == monitoredResource).FirstOrDefault();
                 if (pr != null)
