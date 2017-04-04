@@ -17,6 +17,8 @@ namespace Lib
         protected GameObject gameObjectOff;
         protected Light lightComponentOff;
 
+        protected Log Log = new Log();
+
         //Highlighting.Highlighter a;
 
 

@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace Lib
 {
-    public static class Log
+    public class Log
     {
         public enum LEVEL
         {
@@ -17,9 +17,9 @@ namespace Lib
             DETAIL = 4,
             TRACE = 5
         };
-        static string PREFIX = "";
+        string PREFIX = "";
 
-        public static void setTitle(string t)
+        public void setTitle(string t)
         {
             PREFIX = t + ": ";
         }
@@ -28,33 +28,33 @@ namespace Lib
 
 
 
-        public static LEVEL GetLevel()
+        public LEVEL GetLevel()
         {
             return level;
         }
 
-        public static void SetLevel(LEVEL level)
+        public void SetLevel(LEVEL level)
         {
             UnityEngine.Debug.Log("log level " + level);
             Log.level = level;
         }
 
-        public static LEVEL GetLogLevel()
+        public LEVEL GetLogLevel()
         {
             return level;
         }
 
-        private static bool IsLevel(LEVEL level)
+        private bool IsLevel(LEVEL level)
         {
-            return level == Log.level;
+            return Log.level == level;
         }
 
-        public static bool IsLogable(LEVEL level)
+        public bool IsLogable(LEVEL level)
         {
-            return level <= Log.level;
+            return Log.level <= level;
         }
 
-        public static void Trace(String msg)
+        public void Trace(String msg)
         {
             if (IsLogable(LEVEL.TRACE))
             {
@@ -62,7 +62,7 @@ namespace Lib
             }
         }
 
-        public static void Detail(String msg)
+        public void Detail(String msg)
         {
             if (IsLogable(LEVEL.DETAIL))
             {
@@ -71,7 +71,7 @@ namespace Lib
         }
 
         //        [ConditionalAttribute("DEBUG")]
-        public static void Info(String msg)
+        public void Info(String msg)
         {
 
             if (IsLogable(LEVEL.INFO))
@@ -82,7 +82,7 @@ namespace Lib
         }
 
         //        [ConditionalAttribute("DEBUG")]
-        public static void Test(String msg)
+        public void Test(String msg)
         {
             //if (IsLogable(LEVEL.INFO))
 
@@ -92,7 +92,7 @@ namespace Lib
         }
 
 
-        public static void Warning(String msg)
+        public void Warning(String msg)
         {
             if (IsLogable(LEVEL.WARNING))
             {
@@ -100,7 +100,7 @@ namespace Lib
             }
         }
 
-        public static void Error(String msg)
+        public void Error(String msg)
         {
             if (IsLogable(LEVEL.ERROR))
             {
@@ -108,9 +108,9 @@ namespace Lib
             }
         }
 
-        public static void Exception(Exception e)
+        public void Exception(Exception e)
         {
-            Log.Error("exception caught: " + e.GetType() + ": " + e.Message);
+            Error("exception caught: " + e.GetType() + ": " + e.Message);
         }
 
     }

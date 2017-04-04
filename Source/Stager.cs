@@ -116,9 +116,9 @@ namespace Lib
             {
                 this.part.OnEditorAttach += OnEditorAttach;
             }
-            Log.Info("KM Stager Started");
 
-
+            Log.setTitle("KM Stager");
+            Log.Info("Started");
 
             //Force activation no matter which stage it's on
             this.part.force_activate();
@@ -161,7 +161,7 @@ namespace Lib
             //In order for physics to take effect on jettisoned parts, the staging event has to be fired from OnUpdate
             if (fireNextupdate)
             {
-                Log.Info(string.Format("KM Stager: Target percentage hit, resource level: {0}", triggerFlightDisplay));
+                Log.Info(string.Format("Target percentage hit, resource level: {0}", triggerFlightDisplay));
                 fireAction();
             }
         }
@@ -431,16 +431,16 @@ namespace Lib
             //If this is a smart fuel tank, monitor self
             if (this.part.Resources.Count > 0)
             {
-                Log.Info("KM Stager: Monitoring this part");
+                Log.Info("Monitoring this part");
                 observedPart = this.part;
             }
             //Otherwise monitor the parent part
             else
             {
-                Log.Info("KM Stager: Monitoring parent part");
+                Log.Info("Monitoring parent part");
                 observedPart = this.part.parent;
             }
-            Log.Info("KM Stager: Set observed part to " + observedPart.partName + "Active is: " + isArmed);
+            Log.Info("Set observed part to " + observedPart.partName + "Active is: " + isArmed);
         }
 
         private void updateList()
@@ -500,7 +500,7 @@ namespace Lib
 
         /*
                 private void changeListener() {
-                    Log.Info("KM Stager: Monitored part resoruces changed. Updating.");
+                    Log.Info("Monitored part resoruces changed. Updating.");
                     findObservedPart();
                     updateList();
                 }
