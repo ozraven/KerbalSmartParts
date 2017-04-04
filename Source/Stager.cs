@@ -161,6 +161,7 @@ namespace Lib
             //In order for physics to take effect on jettisoned parts, the staging event has to be fired from OnUpdate
             if (fireNextupdate)
             {
+                Log.Info(string.Format("KM Stager: Target percentage hit, resource level: {0}", triggerFlightDisplay));
                 fireAction();
             }
         }
@@ -247,11 +248,11 @@ namespace Lib
         {
             if (isArmed && monitoredResource != "Empty")
             {
+                Log.Info(string.Format("OnFixedUpdate, Monitor Mode: {0}, Trigger Mode: {1}", monitorFlightDisplay, triggerFlightDisplay));
                 if (singlePart == monitoredParts.single && observedPart != null)
                 {
                     if (lastFill >= 0)
                     {
-                        Log.Info("OnFixedUpdate, singlePart");
                         if (decreasing)
                         {
                             //Once target percentage is hit, fire the action
@@ -261,7 +262,6 @@ namespace Lib
                             {
                                 fireNextupdate = true;
                                 isArmed = false;
-                                Log.Info("KM Stager: Target percentage hit, resource level was decreasing");
                             }
                         }
                         else
@@ -273,7 +273,6 @@ namespace Lib
                             {
                                 fireNextupdate = true;
                                 isArmed = false;
-                                Log.Info("KM Stager: Target percentage hit, resource level was increasing");
                             }
                         }
                     }
@@ -282,7 +281,6 @@ namespace Lib
                 }
                 else
                 {
-                    Log.Info(string.Format("OnFixedUpdate, {0}", singlePart == monitoredParts.stage ? "current stage" : "entire ship"));
                     getVesselResource();
                     if (lastFill >= 0)
                     {
@@ -294,7 +292,6 @@ namespace Lib
                             {
                                 fireNextupdate = true;
                                 isArmed = false;
-                                Log.Info("KM Stager: Target percentage hit, resource level was decreasing");
                             }
                         }
                         else
@@ -305,7 +302,6 @@ namespace Lib
                             {
                                 fireNextupdate = true;
                                 isArmed = false;
-                                Log.Info("KM Stager: Target percentage hit, resource level was increasing");
                             }
                         }
                     }
