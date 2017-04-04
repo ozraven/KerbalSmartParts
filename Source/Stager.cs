@@ -309,12 +309,6 @@ namespace Lib
                     lastFill = totalVesselAmount;
                 }
             }
-            // Only rearm if disarmed and not ready to fire on next update
-            if (!isArmed && !fireNextupdate && autoReset)
-            {
-                isArmed = true;
-            }
-
         }
 
         public void Update()
@@ -378,6 +372,10 @@ namespace Lib
                 Fields["agxGroupNum"].guiActiveEditor = false;
                 Fields["agxGroupNum"].guiActive = false;
             }
+
+            //Hide auto reset button, since we don't need, we can reactivate in AG
+            Fields["autoReset"].guiActive = false;
+            Fields["autoReset"].guiActiveEditor = false;
 
             if (decreasing)
                 Events["setDecreasing"].guiName = "Trigger when Decreasing";
