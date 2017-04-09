@@ -40,13 +40,10 @@ namespace Lib
 
         [KSPField(isPersistant = true)]
         private Boolean useSeconds = true;
-
-
         #endregion
 
 
         #region Events
-
         [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Use Seconds")]
         public void setSeconds()
         {
@@ -98,21 +95,17 @@ namespace Lib
         {
             reset();
         }
-
         #endregion
 
 
         #region Variables
-
         private int previousStage = 0;
         private string groupLastUpdate = "0"; //AGX: What was our selected group last update frame? Top slider.
-
-
+        private bool isCountingDown = false;
         #endregion
 
 
         #region Overrides
-
         public override void OnStart(StartState state)
         {
             if (!isArmed)
@@ -158,13 +151,19 @@ namespace Lib
             if (triggerTime > 0 && isArmed)
             {
                 remainingTime = triggerTime + (useSeconds ? triggerDelaySeconds : triggerDelayMinutes * 60) - Planetarium.GetUniversalTime();
-                lightsOn();
+                lightsOn(Utility.LightColor.GREEN);
                 this.part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
 
                 //Once the timer hits 0 activate the stage/AG, disable the model's LED, and change the icon color
-                if (remainingTime < 0)
+                if (remainingTime <= 0)
                 {
                     Log.Info("Stage:" + Helper.KM_dictAGNames[int.Parse(group)]);
+                    part.stackIcon.SetIconColor(XKCDColors.Red);
+                    triggerTime = 0;
+                    remainingTime = 0;
+                    //Disable timer until reset
+                    isArmed = false;
+                    isCountingDown = false;
                     int groupToFire = 0; //AGX: need to send correct group
                     if (AGXInterface.AGExtInstalled())
                     {
@@ -175,20 +174,16 @@ namespace Lib
                         groupToFire = int.Parse(group);
                     }
                     Helper.fireEvent(this.part, groupToFire, (int)agxGroupNum);
-                    this.part.stackIcon.SetIconColor(XKCDColors.Red);
-                    triggerTime = 0;
-                    remainingTime = 0;
-                    //Disable timer until reset
-                    isArmed = false;
+                    lightsOn();
                 }
             }
         }
+
         public void Update() //AGX: The OnUpdate above only seems to run in flight mode, Update() here runs in all scenes
         {
             if (agxGroupType == "1" & groupLastUpdate != "1" || agxGroupType != "1" & groupLastUpdate == "1") //AGX: Monitor group to see if we need to refresh window
             {
                 updateButtons();
-                refreshPartWindow();
                 if (agxGroupType == "1")
                 {
                     groupLastUpdate = "1";
@@ -204,8 +199,6 @@ namespace Lib
 
 
         #region Methods
-
-
         public void onVesselChange(Vessel newVessel)
         {
             if (newVessel == this.vessel && !allowStage)
@@ -238,9 +231,10 @@ namespace Lib
 
         private void setTimer()
         {
-            if (isArmed)
+            if (isArmed && !isCountingDown)
             {
                 //Set the trigger time, which will be caught in OnUpdate
+                isCountingDown = true;
                 triggerTime = Planetarium.GetUniversalTime();
                 Log.Info("Activating Timer: " + (useSeconds ? triggerDelaySeconds : triggerDelayMinutes * 60));
             }
@@ -257,6 +251,7 @@ namespace Lib
             this.part.stackIcon.SetIconColor(XKCDColors.White);
             //Reset armed variable
             isArmed = true;
+            isCountingDown = false;
             //Reset activation status on part
             this.part.deactivate();
         }
