@@ -18,85 +18,6 @@ namespace Lib
     public class Timer : SmartSensorModuleBase
     {
         #region Fields
-#if false
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group"),
-            UI_ChooseOption(
-            options = new String[] {
-                "0",
-                "1",
-                "2",
-                "3",
-                "4",
-                "5",
-                "6",
-                "7",
-                "8",
-                "9",
-                "10",
-                "11",
-                "12",
-                "13",
-                "14",
-                "15",
-                "16"
-            },
-            display = new String[] {
-                "Stage",
-                "AG1",
-                "AG2",
-                "AG3",
-                "AG4",
-                "AG5",
-                "AG6",
-                "AG7",
-                "AG8",
-                "AG9",
-                "AG10",
-                "Lights",
-                "RCS",
-                "SAS",
-                "Brakes",
-                "Abort",
-                "Gear"
-            }
-        )]
-        public string group = "0";
-
-        //AGXGroup shows if AGX installed and hides Group above
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false, guiName = "Group"),
-            UI_ChooseOption(
-            options = new String[] {
-                "0",
-                "1",
-                "11",
-                "12",
-                "13",
-                "14",
-                "15",
-                "16"
-            },
-            display = new String[] {
-                "Stage",
-                "Action Group:",
-                "Lights",
-                "RCS",
-                "SAS",
-                "Brakes",
-                "Abort",
-                "Gear"
-            }
-        )]
-        public string agxGroupType = "0";
-
-        // AGX Action groups, use own slider if selected, only show this field if AGXGroup above is 1
-        [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Group:", guiFormat = "N0"),
-            UI_FloatEdit(scene = UI_Scene.All, minValue = 1f, maxValue = 250f, incrementLarge = 75f, incrementSmall = 25f, incrementSlide = 1f)]
-        public float agxGroupNum = 1;
-
-        [KSPField(isPersistant = true)]
-        private Boolean isArmed = true;
-#endif
-
         // remember the time wehen the countdown was started
         [KSPField(isPersistant = true, guiActive = false)]
         private double triggerTime = 0;
@@ -196,9 +117,7 @@ namespace Lib
         {
             if (!isArmed)
             {
-                Utility.switchEmissive(this, lightComponentOn, true);
-                //Utility.switchLight(this.part, "light-go", true);
-                Utility.playAnimationSetToPosition(this.part, "glow", 1);
+                lightsOn();
                 this.part.stackIcon.SetIconColor(XKCDColors.Red);
             }
             if (allowStage)
@@ -239,9 +158,7 @@ namespace Lib
             if (triggerTime > 0 && isArmed)
             {
                 remainingTime = triggerTime + (useSeconds ? triggerDelaySeconds : triggerDelayMinutes * 60) - Planetarium.GetUniversalTime();
-                Utility.switchEmissive(this, lightComponentOn, true);
-                //Utility.switchLight(this.part, "light-go", true);
-                Utility.playAnimationSetToPosition(this.part, "glow", 1);
+                lightsOn();
                 this.part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
 
                 //Once the timer hits 0 activate the stage/AG, disable the model's LED, and change the icon color
@@ -335,10 +252,7 @@ namespace Lib
             //Reset trigger and remaining time to 0
             triggerTime = 0;
             remainingTime = 0;
-            //Switch off model lights
-            Utility.switchEmissive(this, lightComponentOn, false);
-            //Utility.switchLight(this.part, "light-go", false);
-            Utility.playAnimationSetToPosition(this.part, "glow", 0);
+            lightsOff();
             //Reset icon color to white
             this.part.stackIcon.SetIconColor(XKCDColors.White);
             //Reset armed variable
@@ -416,6 +330,10 @@ namespace Lib
                 Fields["agxGroupNum"].guiActiveEditor = false;
                 Fields["agxGroupNum"].guiActive = false;
             }
+
+            //Hide auto reset button, since we don't need, we can reactivate in AG
+            Fields["autoReset"].guiActive = false;
+            Fields["autoReset"].guiActiveEditor = false;
         }
 
         private void onGUI()

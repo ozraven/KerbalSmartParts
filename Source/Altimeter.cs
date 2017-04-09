@@ -168,7 +168,6 @@ namespace Lib
 
         private double alt = 0;
         private double currentWindow = 0;
-        private Boolean illuminated = false;
         private Boolean ascending = false;
         private Boolean fireNextupdate = false;
         private string groupLastUpdate = "0"; //AGX: What was our selected group last update frame? Top slider.
@@ -292,22 +291,6 @@ namespace Lib
             ascending = (lastAlt < alt ? true : false);
             //Update target window size based on current vertical velocity
             currentWindow = Math.Abs((TimeWarp.fixedDeltaTime * this.vessel.verticalSpeed) * 1.05);
-        }
-
-        private void lightsOn() {
-            //Switch off model lights
-            Utility.switchEmissive(this, lightComponentOn, true);
-          //  Utility.switchLight(this.part, "light-go", true);
-            Utility.playAnimationSetToPosition(this.part, "glow", 1);
-            illuminated = true;
-        }
-
-        private void lightsOff() {
-            //Switch off model lights
-            Utility.switchEmissive(this, lightComponentOn, false);
-            //Utility.switchLight(this.part, "light-go", false);
-            Utility.playAnimationSetToPosition(this.part, "glow", 0);
-            illuminated = false;
         }
 
         private void updateButtons() {

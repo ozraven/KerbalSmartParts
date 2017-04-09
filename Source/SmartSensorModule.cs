@@ -107,6 +107,9 @@ namespace Lib
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Auto Reset"),
             UI_Toggle(disabledText = "False", enabledText = "True")]
         public bool autoReset = false;
+
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false, guiName = "Illuminated")]
+        public bool illuminated = false;
         #endregion
 
 
@@ -164,6 +167,26 @@ namespace Lib
                 lightComponentOff.enabled = false;
                 
             }
+        }
+
+        protected void lightsOn()
+        {
+            if (part == null) return;
+            //Switch on model lights
+            Utility.switchEmissive(this, lightComponentOn, true);
+            //Utility.switchLight(this.part, "light-go", true);
+            Utility.playAnimationSetToPosition(this.part, "glow", 1);
+            illuminated = true;
+        }
+
+        protected void lightsOff()
+        {
+            if (part == null) return;
+            //Switch off model lights
+            Utility.switchEmissive(this, lightComponentOn, false);
+            //Utility.switchLight(this.part, "light-go", false);
+            Utility.playAnimationSetToPosition(this.part, "glow", 0);
+            illuminated = false;
         }
     }
 }
