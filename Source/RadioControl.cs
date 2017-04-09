@@ -28,82 +28,6 @@ namespace Lib
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Channel"), UI_FloatRange(minValue = 1f, maxValue = 20f, stepIncrement = 1f)]
         public float channel = 1;
 
-#if false
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group"),
-            UI_ChooseOption(
-            options = new String[] {
-                "0",
-                "1",
-                "2",
-                "3",
-                "4",
-                "5",
-                "6",
-                "7",
-                "8",
-                "9",
-                "10",
-                "11",
-                "12",
-                "13",
-                "14",
-                "15",
-                "16"
-            },
-            display = new String[] {
-                "Stage",
-                "AG1",
-                "AG2",
-                "AG3",
-                "AG4",
-                "AG5",
-                "AG6",
-                "AG7",
-                "AG8",
-                "AG9",
-                "AG10",
-                "Lights",
-                "RCS",
-                "SAS",
-                "Brakes",
-                "Abort",
-                "Gear"
-            }
-        )]
-        public string group = "0";
-
-        //AGXGroup shows if AGX installed and hides Group above
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false, guiName = "Group"),
-            UI_ChooseOption(
-            options = new String[] {
-                "0",
-                "1",
-                "11",
-                "12",
-                "13",
-                "14",
-                "15",
-                "16"
-            },
-            display = new String[] {
-                "Stage",
-                "Action Group:",
-                "Lights",
-                "RCS",
-                "SAS",
-                "Brakes",
-                "Abort",
-                "Gear"
-            }
-        )]
-        public string agxGroupType = "0";
-
-        // AGX Action groups, use own slider if selected, only show this field if AGXGroup above is 1
-        [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Group:", guiFormat = "N0"),
-            UI_FloatEdit(scene = UI_Scene.All, minValue = 1f, maxValue = 250f, incrementLarge = 75f, incrementSmall = 25f, incrementSlide = 1f)]
-        public float agxGroupNum = 1;
-#endif
-
         double fireTime = 0;
         double lightOnTime = 2;
         private string groupLastUpdate = "0"; //AGX: What was our selected group last update frame? Top slider.
@@ -328,17 +252,13 @@ namespace Lib
         }
 
         private void indicateSend() {
-            Utility.switchEmissive(this, lightComponentOn, true);
-            //Utility.switchLight(this.part, "light-go", true);
-            Utility.playAnimationSetToPosition(this.part, "glow", 1);
+            lightsOn();
             fireTime = Time.fixedTime;
             Log.Info("Fire Time:" + fireTime);
         }
 
         private void indicateReceive(bool playSound) {
-            Utility.switchEmissive(this, lightComponentOn, true);
-            //Utility.switchLight(this.part, "light-go", true);
-            Utility.playAnimationSetToPosition(this.part, "glow", 1);
+            lightsOn();
             fireTime = Time.fixedTime;
             if (playSound)
                 Utility.playAudio(this.part, rcv_sound);
@@ -400,9 +320,7 @@ namespace Lib
             updateCounter++;
 
             if (fireTime != 0 && fireTime + lightOnTime <= Time.time) {
-                Utility.switchEmissive(this, lightComponentOn, false);
-                //Utility.switchLight(this.part, "light-go", false);
-                Utility.playAnimationSetToPosition(this.part, "glow", 0);
+                lightsOff();
             }
 
             //if (fireTime != 0 && fireTime + 10 <= Time.time) {

@@ -11,6 +11,8 @@ namespace Lib
 
     public class SmartSensorModuleBase : PartModule
     {
+        public bool illuminated = false;
+
         protected GameObject gameObjectOn;
         protected Light lightComponentOn;
 
@@ -23,7 +25,6 @@ namespace Lib
 
 
         #region Fields
-
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group"),
             UI_ChooseOption(
             options = new String[] {
@@ -164,6 +165,26 @@ namespace Lib
                 lightComponentOff.enabled = false;
                 
             }
+        }
+
+        protected void lightsOn()
+        {
+            if (part == null) return;
+            //Switch on model lights
+            Utility.switchEmissive(this, lightComponentOn, true);
+            //Utility.switchLight(this.part, "light-go", true);
+            Utility.playAnimationSetToPosition(this.part, "glow", 1);
+            illuminated = true;
+        }
+
+        protected void lightsOff()
+        {
+            if (part == null) return;
+            //Switch off model lights
+            Utility.switchEmissive(this, lightComponentOn, false);
+            //Utility.switchLight(this.part, "light-go", false);
+            Utility.playAnimationSetToPosition(this.part, "glow", 0);
+            illuminated = false;
         }
     }
 }
