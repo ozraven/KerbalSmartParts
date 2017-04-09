@@ -17,13 +17,35 @@ namespace Lib
 
     public static class Utility
     {
+        public enum LightColor
+        {
+            RED,
+            GREEN,
+            BLUE,
+            WHITE
+        }
        
-        public static void switchEmissive(SmartSensorModuleBase baseM, Light light, bool state)
+        public static void switchEmissive(SmartSensorModuleBase baseM, Light light, bool state, LightColor color = LightColor.WHITE)
         {
             light.intensity = (state ? 1 : 0);
             light.enabled = state;
             light.enabled = true;
             light.range = 0.25f;
+            switch (color)
+            {
+                case LightColor.RED:
+                    light.color = new Color(1, 0, 0);
+                    break;
+                case LightColor.GREEN:
+                    light.color = new Color(0, 1, 0);
+                    break;
+                case LightColor.BLUE:
+                    light.color = new Color(0, 0, 1);
+                    break;
+                case LightColor.WHITE:
+                    light.color = new Color(1, 1, 1);
+                    break;
+            }
         }
 
         private static void traverseChildren(Part p, int nextStage, ref List<Part> resultList) {

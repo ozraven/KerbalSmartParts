@@ -163,11 +163,11 @@ namespace Lib
             }
         }
 
-        protected void lightsOn()
+        protected void lightsOn(Utility.LightColor color = Utility.LightColor.WHITE)
         {
             if (part == null) return;
             //Switch on model lights
-            Utility.switchEmissive(this, lightComponentOn, true);
+            Utility.switchEmissive(this, lightComponentOn, true, color);
             //Utility.switchLight(this.part, "light-go", true);
             Utility.playAnimationSetToPosition(this.part, "glow", 1);
             illuminated = true;
