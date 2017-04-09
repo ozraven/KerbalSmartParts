@@ -19,6 +19,7 @@ namespace Lib
         #region Fields/Variables
 
         private Dictionary<String, double> drainRatio = new Dictionary<String, double>();
+        private Log Log = new Log();
 
         static float maxSpeedY = -1.0f;
         KSPParticleEmitter valveEffect = null;

@@ -16,6 +16,7 @@ namespace Lib
 {
     public static class Helper
     {
+        private static Log Log = new Log();
         #region Dictionary
 
         public static Dictionary<int, KSPActionGroup> KM_dictAG = new Dictionary<int, KSPActionGroup> {
