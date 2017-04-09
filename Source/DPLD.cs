@@ -119,7 +119,6 @@ namespace Lib
 #endregion
 
         private string groupLastUpdate = "0"; //AGX: What was our selected group last update frame? Top slider.
-        private Boolean illuminated = false;
         private Boolean fireNextupdate = false;
 #region Events
 
@@ -131,26 +130,6 @@ namespace Lib
 
             initLight(true, activeLight);
 
-        }
-
-        private void lightsOn()
-        {
-            if (part == null)
-                return;
-            Log.Info("lightsOn");
-            Utility.switchEmissive(this, lightComponentOn, true);
-            Utility.playAnimationSetToPosition(this.part, "glow", 1);
-            illuminated = true;
-        }
-
-        private void lightsOff()
-        {
-            if (part == null)
-                return;
-            Log.Info("lightsOff");
-            Utility.switchEmissive(this, lightComponentOn, false);
-            Utility.playAnimationSetToPosition(this.part, "glow", 0);
-            illuminated = false;
         }
 
         public override void OnUpdate()

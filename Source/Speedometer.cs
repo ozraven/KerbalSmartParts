@@ -114,9 +114,6 @@ namespace Lib
         [KSPField(guiActive = true, guiName = "Passing threshold")]
         private Boolean isPassingThreshold = false;
 
-        [KSPField(guiActive = true, guiName = "Illuminated")]
-        private Boolean illuminated = false;
-
         [KSPField(guiActive = true, guiName = "Fire next update")]
         private Boolean fireNextupdate = false;
 
@@ -268,24 +265,6 @@ namespace Lib
                 lowerBound < this.meterPerSecondSpeed && this.meterPerSecondSpeed < upperBound);
 
             this.lastSpeed = oldSpeed;
-        }
-
-        private void lightsOn()
-        {
-            //Switch off model lights
-            Utility.switchEmissive(this, lightComponentOn, true);
-            //Utility.switchLight(this.part, "light-go", true);
-            Utility.playAnimationSetToPosition(this.part, "glow", 1);
-            illuminated = true;
-        }
-
-        private void lightsOff()
-        {
-            //Switch off model lights
-            Utility.switchEmissive(this, lightComponentOn,false);
-            //Utility.switchLight(this.part, "light-go", false);
-            Utility.playAnimationSetToPosition(this.part, "glow", 0);
-            illuminated = false;
         }
 
         private void updateButtons()

@@ -99,13 +99,10 @@ namespace Lib
         #endregion
 
         #region Variables
-
         private Part observedPart = null;
         private string groupLastUpdate = "0"; //AGX: What was our selected group last update frame? Top slider.
         private double lastFill = -1; // save the last fill level when the tank drains
         private bool fireNextupdate = false;
-        private bool illuminated = false;
-
         #endregion
 
         #region Overrides
@@ -478,24 +475,6 @@ namespace Lib
                     monitoredResource = "Empty";
                 }
             }
-        }
-
-        private void lightsOn()
-        {
-            //Switch on model lights
-            Utility.switchEmissive(this, lightComponentOn, true);
-            //Utility.switchLight(this.part, "light-go", true);
-            Utility.playAnimationSetToPosition(this.part, "glow", 1);
-            illuminated = true;
-        }
-
-        private void lightsOff()
-        {
-            //Switch off model lights
-            Utility.switchEmissive(this, lightComponentOn, false);
-            //Utility.switchLight(this.part, "light-go", false);
-            Utility.playAnimationSetToPosition(this.part, "glow", 0);
-            illuminated = false;
         }
 
         /*
