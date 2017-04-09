@@ -108,14 +108,7 @@ namespace Lib
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Auto Reset"),
             UI_Toggle(disabledText = "False", enabledText = "True")]
         public bool autoReset = false;
-
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false, guiName = "Illuminated")]
-        public bool illuminated = false;
         #endregion
-
-
-
-
 
         void displayAllComponents()
         {
