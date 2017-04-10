@@ -64,8 +64,6 @@
   <ItemGroup>
     <None Include="Source\deploy.bat" />
     <None Include="Source\buildRelease.bat" />
-    <None Include="Source\SmartParts.version" />
-    <None Include="Source\Changelog.txt" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -93,7 +91,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Changelog.txt" />
     <Content Include="Source\AssemblyVersion.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>AssemblyVersion.cs</LastGenOutput>

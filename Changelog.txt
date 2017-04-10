@@ -137,3 +137,10 @@ Taken over by LinuxGurugamer here
 	Replaced stock logging with log class, reducing log spam
 	Added EC Level Detector
 	Added Resource Level Detector
+
+1.9.5 Thanks to @rakkhin for these changes
+	Fixed missing persistence on trigger direction
+	code cleanups
+	Log class changed to non-static to allow module specific titles
+	Fixed speedometer speed never being zero
+	Fixed multiple timers not working

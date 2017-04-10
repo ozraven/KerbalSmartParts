@@ -249,7 +249,7 @@ namespace Lib
         private void updateSpeed()
         {
             var oldSpeed = this.speed;
-            this.speed = this.vessel.srf_velocity.magnitude;
+            this.speed = Math.Round(this.vessel.srf_velocity.magnitude, 2);
 
             if (Double.IsNaN(this.lastSpeed))
             {

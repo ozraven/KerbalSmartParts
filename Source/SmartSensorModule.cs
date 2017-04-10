@@ -119,7 +119,7 @@ namespace Lib
                 Log.Info("light found: " + component.name);
                 var c = component as Highlighting.Highlighter;
                 c.ConstantOff();
-
+                
             }
         }
 
