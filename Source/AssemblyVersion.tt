@@ -27,7 +27,8 @@
 	int i2 = 0;
 	string s;
 
-	string versionfile =  @"D:\Users\jbb\github\KerbalSmartParts\Source\SmartParts.version";
+	string currentDirectory = Path.GetDirectoryName(Host.TemplateFile);
+	string versionfile =  Path.Combine(currentDirectory, "SmartParts.version");
 	if (!File.Exists(versionfile))
 	{
 		Write("File: " + versionfile + " missing\n");		
