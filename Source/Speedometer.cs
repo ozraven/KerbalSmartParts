@@ -18,15 +18,19 @@ namespace Lib
 
         #region Fields
         [KSPField(isPersistant = true, guiActiveEditor = true, guiActive = true, guiName = "Speed", guiFormat = "F0", guiUnits = "m/s"),
-            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 1000f, incrementLarge = 100f, incrementSmall = 10f, incrementSlide = 0.1f)]
+            UI_FloatEdit(scene = UI_Scene.All, minValue = -1000f, maxValue = 1000f, incrementLarge = 100f, incrementSmall = 10f, incrementSlide = 1f)]
         public float meterPerSecondSpeed = 0;
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Trigger on"),
             UI_ChooseOption(options = new string[] { "All", "Increasing", "Decreasing" })]
         public string direction = "All";
 
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Speed mode"),
+            UI_ChooseOption(options = new string[] { "Surface", "Horizontal", "Vertical", "Orbital" })]
+        public string speedMode = "Surface";
+
         [KSPField(guiActive = true, guiName = "Speed")]
-        public double speed;
+        public double speed = 0;
         [KSPField(guiActive = true, guiName = "Last speed")]
         private double lastSpeed = 0;
 
@@ -76,18 +80,21 @@ namespace Lib
                 this.part.OnEditorDestroy += OnEditorDestroy;
                 OnEditorAttach();
             }
+
+            Log.setTitle("KM Speedometer");
+            Log.Info("Started");
+
             //Initial button layout
             updateButtons();
             //Force activation no matter which stage it's on
             this.part.force_activate();
-            print("KM Speedometer Detector Started");
             updateButtons();
             initLight(true, "light-go");
         }
 
         public override void OnUpdate()
         {
-            Debug.LogError("onUpdate called");
+            Log.Info("onUpdate called");
             //Check to see if the device has been rearmed, if so, deactivate the lights
             if (isArmed && illuminated)
             {
@@ -112,7 +119,7 @@ namespace Lib
 
         public override void OnFixedUpdate()
         {
-            Debug.LogError("onFixedUpdate called");
+            Log.Info("onFixedUpdate called");
             updateSpeed();
             // Only rearm device if it's outside the threshold.
             if (!this.isArmed && this.autoReset && !this.isPassingThreshold)
@@ -170,8 +177,22 @@ namespace Lib
         #region Methods
         private void updateSpeed()
         {
-            var oldSpeed = this.speed;
-            this.speed = Math.Round(this.vessel.srf_velocity.magnitude, 2);
+            switch (speedMode)
+            {
+                case "Surface":
+                default:
+                    this.speed = Math.Round(vessel.srfSpeed, 2);
+                    break;
+                case "Orbital":
+                    this.speed = Math.Round(vessel.obt_speed, 2);
+                    break;
+                case "Horizontal":
+                    this.speed = Math.Round(vessel.horizontalSrfSpeed, 2);
+                    break;
+                case "Vertical":
+                    this.speed = Math.Round(vessel.verticalSpeed, 2);
+                    break;
+            }
 
             if (Double.IsNaN(this.lastSpeed))
             {
@@ -186,7 +207,7 @@ namespace Lib
             this.isPassingThreshold = (
                 lowerBound < this.meterPerSecondSpeed && this.meterPerSecondSpeed < upperBound);
 
-            this.lastSpeed = oldSpeed;
+            this.lastSpeed = this.speed;
         }
 
         private void updateButtons()
@@ -230,22 +251,22 @@ namespace Lib
         private void OnEditorAttach()
         {
             doUpdateEditor = true;
-//            RenderingManager.AddToPostDrawQueue(99, updateEditor);
+            //            RenderingManager.AddToPostDrawQueue(99, updateEditor);
         }
 
         private void OnEditorDetach()
         {
             doUpdateEditor = false;
-//            RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
+            //            RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
         }
 
         private void OnEditorDestroy()
         {
             doUpdateEditor = false;
-//            RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
+            //            RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
 
         }
-        
+
         private void OnGUI()
         {
             if (doUpdateEditor)
