@@ -17,6 +17,84 @@ namespace Lib
     {
 
         #region Fields
+#if false
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group"),
+            UI_ChooseOption(
+            options = new String[] {
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15"
+            },
+            display = new String[] {
+                "Stage",
+                "AG1",
+                "AG2",
+                "AG3",
+                "AG4",
+                "AG5",
+                "AG6",
+                "AG7",
+                "AG8",
+                "AG9",
+                "AG10",
+                "Lights",
+                "RCS",
+                "SAS",
+                "Brakes",
+                "Abort"
+            }
+        )]
+        public string group = "0";
+        //AGXGroup shows if AGX installed and hides Group above
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false, guiName = "Group"),
+            UI_ChooseOption(
+            options = new String[] {
+                "0",
+                "1",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15"
+            },
+            display = new String[] {
+                "Stage",
+                "Action Group:",
+                "Lights",
+                "RCS",
+                "SAS",
+                "Brakes",
+                "Abort"
+            }
+        )]
+        public string agxGroupType = "0";
+        // AGX Action groups, use own slider if selected, only show this field if AGXGroup above is 1
+        [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Group:", guiFormat = "N0"),
+            UI_FloatEdit(scene = UI_Scene.All, minValue = 1f, maxValue = 250f, incrementLarge = 75f, incrementSmall = 25f, incrementSlide = 1f)]
+        public float agxGroupNum = 1;
+
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Active"),
+            UI_Toggle(disabledText = "False", enabledText = "True")]
+        public bool isArmed = true;
+
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Auto Reset"),
+            UI_Toggle(disabledText = "False", enabledText = "True")]
+        public bool autoReset = false;
+#endif
+
         [KSPField(isPersistant = true, guiActiveEditor = true, guiActive = true, guiName = "Speed", guiFormat = "F0", guiUnits = "m/s"),
             UI_FloatEdit(scene = UI_Scene.All, minValue = -1000f, maxValue = 1000f, incrementLarge = 100f, incrementSmall = 10f, incrementSlide = 1f)]
         public float meterPerSecondSpeed = 0;
