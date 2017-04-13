@@ -144,3 +144,8 @@ Taken over by LinuxGurugamer here
 	Log class changed to non-static to allow module specific titles
 	Fixed speedometer speed never being zero
 	Fixed multiple timers not working
+
+1.9.5.1
+	Fixed log spam caused by the conditional directives being commented out in Log.cs by PR submitted by @rakkhin:
+		[ConditionalAttribute("DEBUG")]
+	Added back disabled code in RadioControl.cs, for historical documentation purposes

@@ -70,7 +70,7 @@ namespace Lib
             }
         }
 
-        //        [ConditionalAttribute("DEBUG")]
+[ConditionalAttribute("DEBUG")]
         public void Info(String msg)
         {
 
@@ -81,7 +81,7 @@ namespace Lib
             }
         }
 
-        //        [ConditionalAttribute("DEBUG")]
+[ConditionalAttribute("DEBUG")]
         public void Test(String msg)
         {
             //if (IsLogable(LEVEL.INFO))
