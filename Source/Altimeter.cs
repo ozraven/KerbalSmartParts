@@ -103,7 +103,7 @@ namespace Lib
 #endif
 
         [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Meters", guiFormat = "F0", guiUnits = "m"),
-            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 1000f, incrementLarge = 200f, incrementSmall = 25f, incrementSlide = 1f)]
+            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 2500f, incrementLarge = 250f, incrementSmall = 25f, incrementSlide = 1f)]
         public float meterHeight = 0;
 
         [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Kilometers", guiFormat = "F0", guiUnits = "km"),
@@ -149,18 +149,6 @@ namespace Lib
         public void doDeActivateAG(KSPActionParam param) {
             isArmed = false;
         }
-
-        [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "Lights On")]
-        public void doLightsOn()
-        {
-            lightsOn();
-        }
-        [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "Lights Off")]
-        public void doLightsOff()
-        {
-            lightsOff();
-        }
-
         #endregion
 
 
