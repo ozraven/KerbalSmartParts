@@ -48,3 +48,5 @@ Temporary Items
 tmpfile
 bin
 obj
+.vs
+*.user

@@ -1,5 +1,0 @@
-D:\Users\jbb\github\KerbalSmartParts\bin\Debug\SmartParts.dll
-D:\Users\jbb\github\KerbalSmartParts\bin\Debug\SmartParts.pdb
-D:\Users\jbb\github\KerbalSmartParts\obj\Debug\SmartParts.dll
-D:\Users\jbb\github\KerbalSmartParts\obj\Debug\SmartParts.pdb
-D:\Users\jbb\github\KerbalSmartParts\obj\Debug\SmartParts.csprojResolveAssemblyReference.cache

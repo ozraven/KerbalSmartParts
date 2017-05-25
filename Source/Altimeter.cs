@@ -102,13 +102,13 @@ namespace Lib
 
 #endif
 
-        [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Meters", guiFormat = "F0", guiUnits = "m"),
-            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 1000f, incrementLarge = 200f, incrementSmall = 25f, incrementSlide = 1f)]
-        public float meterHeight = 0;
-
-        [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Kilometers", guiFormat = "F0", guiUnits = "km"),
-            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 500f, incrementLarge = 100f, incrementSmall = 25f, incrementSlide = 1f)]
+        [KSPField(isPersistant = true, guiActive = true, guiName = "Kilometers", guiFormat = "F0", guiUnits = "km"),
+            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 1000f, incrementLarge = 100f, incrementSmall = 25f, incrementSlide = 1f)]
         public float kilometerHeight = 0;
+
+        [KSPField(isPersistant = true, guiActive = true, guiName = "Meters", guiFormat = "F0", guiUnits = "m"),
+            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 1000f, incrementLarge = 100f, incrementSmall = 25f, incrementSlide = 1f)]
+        public float meterHeight = 0;
   
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Trigger on"),
             UI_ChooseOption(options = new string[] { "All", "Ascent", "Descent" })]
@@ -118,28 +118,10 @@ namespace Lib
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Use AGL"),
             UI_Toggle(disabledText = "False", enabledText = "True")]
         public bool useAGL = true;
+        #endregion
 
 
-        [KSPField(isPersistant = true)]
-        public bool useKilometer = false;
-
-#endregion
-
-
-#region Events
-
-        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Use Kilometers")]
-        public void useKilometers() {
-            useKilometer = true;
-            updateButtons();
-        }
-
-        [KSPEvent(guiActive = false, guiActiveEditor = false, guiName = "Use Meters")]
-        public void useMeters() {
-            useKilometer = false;
-            updateButtons();
-        }
-
+        #region Events
         [KSPAction("Activate Detection")]
         public void doActivateAG(KSPActionParam param) {
             isArmed = true;
@@ -149,18 +131,6 @@ namespace Lib
         public void doDeActivateAG(KSPActionParam param) {
             isArmed = false;
         }
-
-        [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "Lights On")]
-        public void doLightsOn()
-        {
-            lightsOn();
-        }
-        [KSPEvent(guiActive = true, guiActiveEditor = true, guiName = "Lights Off")]
-        public void doLightsOff()
-        {
-            lightsOff();
-        }
-
         #endregion
 
 
@@ -172,7 +142,7 @@ namespace Lib
         private Boolean fireNextupdate = false;
         private string groupLastUpdate = "0"; //AGX: What was our selected group last update frame? Top slider.
 
-#endregion
+        #endregion
 
 
 #region Overrides
@@ -213,14 +183,14 @@ namespace Lib
             //If the device is armed, check for the trigger altitude
             if (isArmed) {
                 //We're ascending. Trigger at or above target height
-                if (direction != "Descent" && ascending && Math.Abs((alt - currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) < currentWindow) {
+                if (direction != "Descent" && ascending && Math.Abs((alt - currentWindow) - (kilometerHeight * 1000 + meterHeight)) < currentWindow) {
                     //This flag is checked for in OnUpdate to trigger staging
                     fireNextupdate = true;
                     lightsOn();
                     isArmed = false;
                 }
                 //We're descending. Trigger at or below target height
-                else if (direction != "Ascent" && !ascending && Math.Abs((alt + currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) < currentWindow) {
+                else if (direction != "Ascent" && !ascending && Math.Abs((alt + currentWindow) - (kilometerHeight * 1000 + meterHeight)) < currentWindow) {
                     //This flag is checked for in OnUpdate to trigger staging
                     fireNextupdate = true;
                     lightsOn();
@@ -230,10 +200,10 @@ namespace Lib
 
             //If auto reset is enabled, wait for departure from the target window and rearm
             if (!isArmed & autoReset) {
-                if (ascending && Math.Abs((alt - currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) > currentWindow) {
+                if (ascending && Math.Abs((alt - currentWindow) - (kilometerHeight * 1000 + meterHeight)) > currentWindow) {
                     isArmed = true;
                 }
-                else if (!ascending && Math.Abs((alt + currentWindow) - (useKilometer ? kilometerHeight * 1000 : meterHeight)) > currentWindow) {
+                else if (!ascending && Math.Abs((alt + currentWindow) - (kilometerHeight * 1000 + meterHeight)) > currentWindow) {
                     isArmed = true;
                 }
             }
@@ -294,39 +264,6 @@ namespace Lib
         }
 
         private void updateButtons() {
-            if (useKilometer) {
-                //Show meter button
-                Events["useMeters"].guiActiveEditor = true;
-                Events["useMeters"].guiActive = true;
-                //Hide meter scale
-                Fields["meterHeight"].guiActiveEditor = false;
-                Fields["meterHeight"].guiActive = false;
-                //Hide kilometer button
-                Events["useKilometers"].guiActiveEditor = false;
-                Events["useKilometers"].guiActive = false;
-                //Show kilometer scale
-                Fields["kilometerHeight"].guiActiveEditor = true;
-                Fields["kilometerHeight"].guiActive = true;
-                //Reset meter scale
-                meterHeight = 0;
-            }
-            else {
-                //Hide meter button
-                Events["useMeters"].guiActiveEditor = false;
-                Events["useMeters"].guiActive = false;
-                //Show meter scale
-                Fields["meterHeight"].guiActiveEditor = true;
-                Fields["meterHeight"].guiActive = true;
-                //Show kilometer button
-                Events["useKilometers"].guiActiveEditor = true;
-                Events["useKilometers"].guiActive = true;
-                //Hide kilometer scale
-                Fields["kilometerHeight"].guiActiveEditor = false;
-                Fields["kilometerHeight"].guiActive = false;
-                //Reset kilometer scale
-                kilometerHeight = 0;
-            }
-
             //Change to AGX buttons if AGX installed
             if (AGXInterface.AGExtInstalled()) {
                 Fields["group"].guiActiveEditor = false;
