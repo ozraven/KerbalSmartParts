@@ -149,3 +149,9 @@ Taken over by LinuxGurugamer here
 	Fixed log spam caused by the conditional directives being commented out in Log.cs by PR submitted by @rakkhin:
 		[ConditionalAttribute("DEBUG")]
 	Added back disabled code in RadioControl.cs, for historical documentation purposes
+
+1.9.6
+	These changes are thnanks to @rakkhin (github user account)
+		Altimeter can now be set with both Kilometers and meters
+		Speedomenter can monitor different kinds of speed
+		Assemblyversion.tt updated with path-independedent code
