@@ -111,9 +111,13 @@ Taken over by LinuxGurugamer here
 
 1.8.1
 	Added speedometer
+	Updated Speedmeter to 1.1.3 standards
+			using model modeified by martinezfg11
+
 
 1.8.1.1
 	Cleanup of unnecessary files
+
 
 1.9.0
 	Added tags
@@ -155,3 +159,6 @@ Taken over by LinuxGurugamer here
 		Altimeter can now be set with both Kilometers and meters
 		Speedomenter can monitor different kinds of speed
 		Assemblyversion.tt updated with path-independedent code
+
+1.9.7
+	Updated for 1.3
