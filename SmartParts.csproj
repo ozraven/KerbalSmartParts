@@ -42,6 +42,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Source\AGXInterface.cs" />
     <Compile Include="Source\Altimeter.cs" />
+    <Compile Include="Source\Apsimeter.cs" />
     <Compile Include="Source\AssemblyVersion.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
