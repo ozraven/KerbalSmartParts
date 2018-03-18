@@ -1,20 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2005
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartParts", "SmartParts.csproj", "{668B7336-C342-4CE6-8BF4-B937C6FF9E37}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartParts", "SmartParts\SmartParts.csproj", "{668B7336-C342-4CE6-8BF4-B937C6FF9E37}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFolder", "SolutionFolder", "{907B982D-662E-4EF9-8E14-AEFA57FECCF6}"
 	ProjectSection(SolutionItems) = preProject
-		.gitattributes = .gitattributes
-		.gitignore = .gitignore
-		Source\buildRelease.bat = Source\buildRelease.bat
+		buildRelease.bat = buildRelease.bat
 		Changelog.txt = Changelog.txt
-		Source\deploy.bat = Source\deploy.bat
+		deploy.bat = deploy.bat
 		LICENSE.txt = LICENSE.txt
 		README.md = README.md
-		Source\SmartParts.version = Source\SmartParts.version
+		SmartParts.version = SmartParts.version
 	EndProjectSection
 EndProject
 Global
@@ -30,5 +28,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6D96F658-A15D-4B7B-BF69-3746684E369F}
 	EndGlobalSection
 EndGlobal
