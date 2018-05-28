@@ -168,3 +168,10 @@ Taken over by LinuxGurugamer here
 
 1.9.9
 	Updated for KSP 1.4.1
+
+1.9.10
+	Updated .version file for all of 1.4
+	Added two optional patches to be used with PatchManager
+		Add the RadioControl remote control module to all command modules
+		Add the Proximity Sensor to all command modules
+		
