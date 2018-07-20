@@ -175,3 +175,6 @@ Taken over by LinuxGurugamer here
 		Add the RadioControl remote control module to all command modules
 		Add the Proximity Sensor to all command modules
 		
+1.9.11
+	Fixed bad characters in patch files
+	Added missing sound files
