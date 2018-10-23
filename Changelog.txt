@@ -178,3 +178,6 @@ Taken over by LinuxGurugamer here
 1.9.11
 	Fixed bad characters in patch files
 	Added missing sound files
+
+1.9.11.1
+	Version bump for 1.5 rebuild
