@@ -181,3 +181,7 @@ Taken over by LinuxGurugamer here
 
 1.9.11.1
 	Version bump for 1.5 rebuild
+
+1.9.12
+	Added Smart tag, thanks @Gordon-dry
+	Fixed typo in km_smart_proximity.cfg, thanks @7ranceaddic7
