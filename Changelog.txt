@@ -185,3 +185,8 @@ Taken over by LinuxGurugamer here
 1.9.12
 	Added Smart tag, thanks @Gordon-dry
 	Fixed typo in km_smart_proximity.cfg, thanks @7ranceaddic7
+
+1.9.13
+	Removed Smart tag
+	Converted smart-controller_plus-complete.mbm to smart-controller_plus-complete.dds
+
