@@ -190,3 +190,6 @@ Taken over by LinuxGurugamer here
 	Removed Smart tag
 	Converted smart-controller_plus-complete.mbm to smart-controller_plus-complete.dds
 
+1.9.13.1
+	Updated .version file
+	Updated README with correct links
