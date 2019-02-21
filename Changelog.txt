@@ -196,3 +196,8 @@ Taken over by LinuxGurugamer here
 1.9.13.2
 	Updated .version file
 	Updated README with correct links
+
+1.9.13.4 (unreleased)
+	Fixed DPLD module to only show one of the Group fields
+	Fixed nullref when attaching an EC detector to a tank and having detector set to "single part"
+	Added check to the timer to not do anything in the OnUpdate if physics wasn't ready yet (probably not needed)

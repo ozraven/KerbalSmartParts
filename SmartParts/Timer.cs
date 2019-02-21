@@ -137,9 +137,14 @@ namespace Lib
                 setTimer();
             }
         }
-
+        private const int PHYSICSWAIT = 1;
+        int physicsCnt = 0;
         public override void OnUpdate()
         {
+            if (FlightGlobals.fetch.activeVessel.HoldPhysics || physicsCnt++ < PHYSICSWAIT)
+            {
+                return;
+            }
             //Check to see if the timer has been dragged in the staging list. If so, reset icon color
             if (this.part.inverseStage != previousStage && allowStage && !isArmed && this.part.inverseStage + 1 < StageManager.CurrentStage)
             {
