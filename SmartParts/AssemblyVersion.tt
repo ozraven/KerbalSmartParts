@@ -27,8 +27,14 @@
 	int i2 = 0;
 	string s;
 
-	string currentDirectory = Path.GetDirectoryName(Host.TemplateFile);
-	string versionfile =  Path.Combine(currentDirectory, "SmartParts.version");
+	//string currentDirectory = Path.GetDirectoryName(Host.TemplateFile);
+	//string versionfile =  Path.Combine(currentDirectory, "SmartParts.version");
+
+	//
+	// Update the following with the complete path to the .version file
+	//
+	string versionfile =  @"D:\Users\jbb\github\KerbalSmartParts\SmartParts.version";
+
 	if (!File.Exists(versionfile))
 	{
 		Write("File: " + versionfile + " missing\n");		

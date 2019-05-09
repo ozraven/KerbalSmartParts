@@ -246,7 +246,7 @@ namespace Lib
             if (isArmed && monitoredResource != "Empty")
             {
                 Log.Info(string.Format("OnFixedUpdate, Monitor Mode: {0}, Trigger Mode: {1}", monitorFlightDisplay, triggerFlightDisplay));
-                if (singlePart == monitoredParts.single && observedPart != null)
+                if (singlePart == monitoredParts.single && observedPart != null && observedPart.Resources[monitoredResource] != null)
                 {
                     if (lastFill >= 0)
                     {

@@ -40,30 +40,30 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Source\AGXInterface.cs" />
-    <Compile Include="Source\Altimeter.cs" />
-    <Compile Include="Source\Apsimeter.cs" />
-    <Compile Include="Source\AssemblyVersion.cs">
+    <Compile Include="AGXInterface.cs" />
+    <Compile Include="Altimeter.cs" />
+    <Compile Include="Apsimeter.cs" />
+    <Compile Include="AssemblyVersion.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>AssemblyVersion.tt</DependentUpon>
     </Compile>
-    <Compile Include="Source\DPLD.cs" />
-    <Compile Include="Source\Log.cs" />
-    <Compile Include="Source\SmartSensorModule.cs" />
-    <Compile Include="Source\Speedometer.cs" />
-    <Compile Include="Source\FuelController.cs" />
-    <Compile Include="Source\Helper.cs" />
-    <Compile Include="Source\ProxSensor.cs" />
-    <Compile Include="Source\RadioControl.cs" />
-    <Compile Include="Source\Stager.cs" />
-    <Compile Include="Source\Timer.cs" />
-    <Compile Include="Source\Utility.cs" />
-    <Compile Include="Source\Valve.cs" />
+    <Compile Include="DPLD.cs" />
+    <Compile Include="Log.cs" />
+    <Compile Include="SmartSensorModule.cs" />
+    <Compile Include="Speedometer.cs" />
+    <Compile Include="FuelController.cs" />
+    <Compile Include="Helper.cs" />
+    <Compile Include="ProxSensor.cs" />
+    <Compile Include="RadioControl.cs" />
+    <Compile Include="Stager.cs" />
+    <Compile Include="Timer.cs" />
+    <Compile Include="Utility.cs" />
+    <Compile Include="Valve.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Content Include="Source\AssemblyVersion.tt">
+    <Content Include="AssemblyVersion.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>AssemblyVersion.cs</LastGenOutput>
     </Content>
@@ -97,12 +97,12 @@
     </Reference>
   </ItemGroup>
   <PropertyGroup>
-    <PostBuildEvent>start /D D:\Users\jbb\github\KerbalSmartParts\Source  /WAIT deploy.bat
+    <PostBuildEvent>
+start /D D:\Users\jbb\github\KerbalSmartParts /WAIT deploy.bat  $(TargetDir) $(TargetFileName)
 
 if $(ConfigurationName) == Release (
-start /D D:\Users\jbb\github\KerbalSmartParts\Source /WAIT buildRelease.bat
-)
-</PostBuildEvent>
+	start /D D:\Users\jbb\github\KerbalSmartParts /WAIT buildRelease.bat $(TargetDir) $(TargetFileName)
+)</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>
@@ -111,6 +111,6 @@ set textTemplatingPath="%25ProgramFiles(x86)%25\Microsoft Visual Studio\2017\Com
 
 
 
-%25textTemplatingPath%25 "$(ProjectDir)\Source\AssemblyVersion.tt"</PreBuildEvent>
+%25textTemplatingPath%25 "$(ProjectDir)\AssemblyVersion.tt"</PreBuildEvent>
   </PropertyGroup>
 </Project>

@@ -60,3 +60,5 @@ cd ..
 set FILE="%RELEASEDIR%\SmartParts-%VERSION%.zip"
 IF EXIST %FILE% del /F %FILE%
 %ZIP% a -tzip %FILE% Gamedata\SmartParts
+
+pause

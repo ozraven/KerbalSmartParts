@@ -165,3 +165,39 @@ Taken over by LinuxGurugamer here
 
 1.9.8
 	updated for KSP 1.3.1
+
+1.9.9
+	Updated for KSP 1.4.1
+
+1.9.10
+	Updated .version file for all of 1.4
+	Added two optional patches to be used with PatchManager
+		Add the RadioControl remote control module to all command modules
+		Add the Proximity Sensor to all command modules
+		
+1.9.11
+	Fixed bad characters in patch files
+	Added missing sound files
+
+1.9.11.1
+	Version bump for 1.5 rebuild
+
+1.9.12
+	Added Smart tag, thanks @Gordon-dry
+	Fixed typo in km_smart_proximity.cfg, thanks @7ranceaddic7
+
+1.9.13
+	Removed Smart tag
+	Converted smart-controller_plus-complete.mbm to smart-controller_plus-complete.dds
+	
+1.9.13.1
+	Put back the smart tag
+
+1.9.13.2
+	Updated .version file
+	Updated README with correct links
+
+1.9.13.4
+	Fixed DPLD module to only show one of the Group fields
+	Fixed nullref when attaching an EC detector to a tank and having detector set to "single part"
+	Added check to the timer to not do anything in the OnUpdate if physics wasn't ready yet (probably not needed)

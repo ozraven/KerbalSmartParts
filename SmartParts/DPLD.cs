@@ -129,9 +129,10 @@ namespace Lib
             GameEvents.CommNet.OnNetworkInitialized.Add(onNetworkInitialized);
 
             initLight(true, activeLight);
-
+            updateButtons();
         }
-
+        private const int PHYSICSWAIT = 1;
+        int physicsCnt = 0;
         public override void OnUpdate()
         {
             //Check to see if the device has been rearmed, if so, deactivate the lights
@@ -139,7 +140,15 @@ namespace Lib
             {
                 lightsOff();
             }
+
+            if (FlightGlobals.fetch.activeVessel.HoldPhysics || physicsCnt++ < PHYSICSWAIT)
+            {
+                fireNextupdate = false;
+                return; 
+            }
+
             //In order for physics to take effect on jettisoned parts, the staging event has to be fired from OnUpdate
+
             if (fireNextupdate)
             {
                 int groupToFire = 0; //AGX: need to send correct group
@@ -149,13 +158,13 @@ namespace Lib
                 }
                 else
                 {
+                    Log.Info("DPLD.OnUpdate Fire");
                     groupToFire = int.Parse(group);
                 }
                 Helper.fireEvent(this.part, groupToFire, (int)agxGroupNum);
                 fireNextupdate = false;
             }
         }
-
 
 
         public void Update()
@@ -220,6 +229,7 @@ namespace Lib
 
         void onCommHomeStatusChange(Vessel v, bool b)
         {
+            Log.Info("DPLD.onCommHomeStatusChange");
             //This flag is checked for in OnUpdate to trigger staging
             fireNextupdate = true;
             lightsOn();
@@ -227,6 +237,7 @@ namespace Lib
         }
         void onCommStatusChange(Vessel v, bool b)
         {
+            Log.Info("DPLD.onCommStatusChange");
             //This flag is checked for in OnUpdate to trigger staging
             fireNextupdate = true;
             lightsOn();
@@ -234,6 +245,7 @@ namespace Lib
         }
         void onNetworkInitialized()
         {
+            Log.Info("DPLD.onNetworkInitialized");
             //This flag is checked for in OnUpdate to trigger staging
             fireNextupdate = true;
             lightsOn();
