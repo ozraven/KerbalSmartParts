@@ -4,11 +4,7 @@
  *
  */
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-using KSP.IO;
+
 //using KSPAPIExtensions;
 
 namespace Lib
@@ -16,94 +12,23 @@ namespace Lib
     public class Speedometer : SmartSensorModuleBase
     {
 
+        const float LOW_MAXSPEED = 1000;
+        const float HIGH_MAXSPEED = 5000;
         #region Fields
-#if false
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Group"),
-            UI_ChooseOption(
-            options = new String[] {
-                "0",
-                "1",
-                "2",
-                "3",
-                "4",
-                "5",
-                "6",
-                "7",
-                "8",
-                "9",
-                "10",
-                "11",
-                "12",
-                "13",
-                "14",
-                "15"
-            },
-            display = new String[] {
-                "Stage",
-                "AG1",
-                "AG2",
-                "AG3",
-                "AG4",
-                "AG5",
-                "AG6",
-                "AG7",
-                "AG8",
-                "AG9",
-                "AG10",
-                "Lights",
-                "RCS",
-                "SAS",
-                "Brakes",
-                "Abort"
-            }
-        )]
-        public string group = "0";
-        //AGXGroup shows if AGX installed and hides Group above
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false, guiName = "Group"),
-            UI_ChooseOption(
-            options = new String[] {
-                "0",
-                "1",
-                "11",
-                "12",
-                "13",
-                "14",
-                "15"
-            },
-            display = new String[] {
-                "Stage",
-                "Action Group:",
-                "Lights",
-                "RCS",
-                "SAS",
-                "Brakes",
-                "Abort"
-            }
-        )]
-        public string agxGroupType = "0";
-        // AGX Action groups, use own slider if selected, only show this field if AGXGroup above is 1
-        [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Group:", guiFormat = "N0"),
-            UI_FloatEdit(scene = UI_Scene.All, minValue = 1f, maxValue = 250f, incrementLarge = 75f, incrementSmall = 25f, incrementSlide = 1f)]
-        public float agxGroupNum = 1;
-
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Active"),
-            UI_Toggle(disabledText = "False", enabledText = "True")]
-        public bool isArmed = true;
-
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Auto Reset"),
-            UI_Toggle(disabledText = "False", enabledText = "True")]
-        public bool autoReset = false;
-#endif
 
         [KSPField(isPersistant = true, guiActiveEditor = true, guiActive = true, guiName = "Speed", guiFormat = "F0", guiUnits = "m/s"),
-            UI_FloatEdit(scene = UI_Scene.All, minValue = -1000f, maxValue = 1000f, incrementLarge = 100f, incrementSmall = 10f, incrementSlide = 1f)]
+            UI_FloatEdit(scene = UI_Scene.All, minValue = -LOW_MAXSPEED, maxValue = LOW_MAXSPEED, incrementLarge = 100f, incrementSmall = 10f, incrementSlide = 1f)]
         public float meterPerSecondSpeed = 0;
 
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Trigger on"),
+        [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Speed", guiFormat = "F0", guiUnits = "m/s"),
+            UI_FloatEdit(scene = UI_Scene.All, minValue = -HIGH_MAXSPEED, maxValue = HIGH_MAXSPEED, incrementLarge = 500f, incrementSmall = 50f, incrementSlide = 5f)]
+        public float meterPerSecondSpeedHigh = 0;
+
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Trigger on"),
             UI_ChooseOption(options = new string[] { "All", "Increasing", "Decreasing" })]
         public string direction = "All";
 
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Speed mode"),
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Speed mode"),
             UI_ChooseOption(options = new string[] { "Surface", "Horizontal", "Vertical", "Orbital" })]
         public string speedMode = "Surface";
 
@@ -126,6 +51,30 @@ namespace Lib
 
         #endregion
         #region Events
+        [KSPEvent(guiName = "Toggle max speed", guiActiveEditor = true)]
+        public void doToggleMaxSpeed()
+        {
+            maxSpeedLow = !maxSpeedLow;
+
+            UpdateToggleMaxSpeedgui();
+        }
+        void UpdateToggleMaxSpeedgui()
+        {
+            Fields["meterPerSecondSpeed"].guiActive = maxSpeedLow;
+            Fields["meterPerSecondSpeed"].guiActiveEditor = maxSpeedLow;
+
+            Fields["meterPerSecondSpeedHigh"].guiActive = !maxSpeedLow;
+            Fields["meterPerSecondSpeedHigh"].guiActiveEditor = !maxSpeedLow;
+
+            if (maxSpeedLow)
+                Events["doToggleMaxSpeed"].guiName = "Toggle max speed (currently: " + LOW_MAXSPEED + ")";
+            else
+                Events["doToggleMaxSpeed"].guiName = "Toggle max speed (currently: " + HIGH_MAXSPEED + ")";
+        }
+
+        [KSPField]
+        bool maxSpeedLow = true;
+
         [KSPAction("Activate Detection")]
         public void doActivateAG(KSPActionParam param)
         {
@@ -282,8 +231,16 @@ namespace Lib
 
             var lowerBound = Math.Min(this.speed, this.lastSpeed);
             var upperBound = Math.Max(this.speed, this.lastSpeed);
-            this.isPassingThreshold = (
-                lowerBound < this.meterPerSecondSpeed && this.meterPerSecondSpeed < upperBound);
+            if (maxSpeedLow)
+            {
+                this.isPassingThreshold = (
+                    lowerBound < this.meterPerSecondSpeed && this.meterPerSecondSpeed < upperBound);
+            }
+            else
+            {
+                this.isPassingThreshold = (
+                    lowerBound < this.meterPerSecondSpeedHigh && this.meterPerSecondSpeedHigh < upperBound);
+            }
 
             this.lastSpeed = this.speed;
         }
@@ -322,6 +279,8 @@ namespace Lib
                 Fields["agxGroupNum"].guiActiveEditor = false;
                 Fields["agxGroupNum"].guiActive = false;
             }
+
+            UpdateToggleMaxSpeedgui();
         }
 
         bool doUpdateEditor = false;
@@ -329,20 +288,16 @@ namespace Lib
         private void OnEditorAttach()
         {
             doUpdateEditor = true;
-            //            RenderingManager.AddToPostDrawQueue(99, updateEditor);
         }
 
         private void OnEditorDetach()
         {
             doUpdateEditor = false;
-            //            RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
         }
 
         private void OnEditorDestroy()
         {
             doUpdateEditor = false;
-            //            RenderingManager.RemoveFromPostDrawQueue(99, updateEditor);
-
         }
 
         private void OnGUI()

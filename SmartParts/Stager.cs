@@ -4,14 +4,10 @@
  *
  */
 
-using KSP.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using UnityEngine;
 
-using KSP.UI;
 
 namespace Lib
 {
@@ -163,9 +159,7 @@ namespace Lib
             }
         }
 
-        public override void OnAwake()
-        {
-        }
+ 
 
         double totalVesselAmount = 0;
         double maxVesselAmount = 0;
