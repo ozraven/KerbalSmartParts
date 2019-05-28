@@ -7,8 +7,6 @@ using KSP.IO;
 
 namespace Lib
 {
-
-
     public class SmartSensorModuleBase : PartModule
     {
         public bool illuminated = false;
