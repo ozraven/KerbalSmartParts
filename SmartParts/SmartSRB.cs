@@ -3,11 +3,14 @@
 
 namespace Lib
 {
-    class SmartSRB : PartModule
+    class SmartSRB : SmartSensorModuleBase
     {
         [KSPField(isPersistant = true, guiActive = true, guiName = "SRB TWR %", guiFormat = "F0", guiUnits = "%"),
         UI_FloatEdit(scene = UI_Scene.All, minValue = 100f, maxValue = 150f, incrementSlide = 1f)]
         public float StagePercentageMass = 0;
+
+        [KSPField(guiActive = true, guiName = "Fire next update")]
+        private Boolean fireNextupdate = false;
 
         #region Variables
         ModuleEngines engineModule;
@@ -22,6 +25,23 @@ namespace Lib
         #region Overrides
         public override void OnUpdate()
         {
+            //In order for physics to take effect on jettisoned parts, the staging event has to be fired from OnUpdate
+            if (fireNextupdate)
+            {
+                int groupToFire = 0; //AGX: need to send correct group
+                if (AGXInterface.AGExtInstalled())
+                {
+                    groupToFire = int.Parse(agxGroupType);
+                }
+                else
+                {
+                    groupToFire = int.Parse(group);
+                }
+                Helper.fireEvent(this.part, groupToFire, (int)agxGroupNum);
+                fireNextupdate = false;
+            }
+
+
             if (checkParentType)
                 CheckParentType();
             double ti = GetThrustInfo(this.part.parent, this.vessel.altitude);
@@ -29,7 +49,8 @@ namespace Lib
             if (maxThrust > 0 && ti >= 0 && ti < (StagePercentageMass / 100) && ti<maxThrust)
             {
                 Log.Info("maxThrust: " + maxThrust.ToString("F2") + ", ti: " + ti.ToString("F2"));
-                Helper.fireEvent(this.part, 0, (int)0);
+                fireNextupdate = true;
+                //Helper.fireEvent(this.part, 0, (int)0);
             }
             maxThrust = Math.Max(maxThrust, ti);
         }

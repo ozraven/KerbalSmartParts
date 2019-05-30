@@ -206,3 +206,5 @@ Taken over by LinuxGurugamer here
 	Added toggle to change the highest velocity in the speedometer
 	Added new smart part SmartSRB, which will stage when the TWR of the SRB by itself drops to a specified value.  
 	Primarily intended for use with BetterSRBs
+1.9.13.6
+	Added action group control to the SmartSRB, per user suggestion
