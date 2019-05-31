@@ -208,3 +208,7 @@ Taken over by LinuxGurugamer here
 	Primarily intended for use with BetterSRBs
 1.9.13.6
 	Added action group control to the SmartSRB, per user suggestion
+
+1.9.13.7
+	Fixed speedometer to remember the new max speed setting
+	Fixed the SmartSRB to show action groups properly when AGX is not installed

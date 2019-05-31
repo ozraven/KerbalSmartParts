@@ -69,7 +69,7 @@ namespace Lib
             updateButtons();
             //Force activation no matter which stage it's on
             this.part.force_activate();
-            print("KM Altimeter Detector Started");
+            Log.Info("KM Altimeter Detector Started");
             updateButtons();
             initLight(true, "light-go");
         }
@@ -143,7 +143,7 @@ namespace Lib
         private void refreshPartWindow() //AGX: Refresh right-click part window to show/hide Groups slider
         {
             UIPartActionWindow[] partWins = FindObjectsOfType<UIPartActionWindow>();
-            //print("Wind count " + partWins.Count());
+            //Log.Info("Wind count " + partWins.Count());
             foreach (UIPartActionWindow partWin in partWins) {
                 partWin.displayDirty = true;
             }
