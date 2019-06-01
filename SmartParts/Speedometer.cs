@@ -72,7 +72,7 @@ namespace Lib
                 Events["doToggleMaxSpeed"].guiName = "Toggle max speed (currently: " + HIGH_MAXSPEED + ")";
         }
 
-        [KSPField]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = false, guiName = "Active")]
         bool maxSpeedLow = true;
 
         [KSPAction("Activate Detection")]
@@ -194,7 +194,7 @@ namespace Lib
         private void refreshPartWindow() //AGX: Refresh right-click part window to show/hide Groups slider
         {
             UIPartActionWindow[] partWins = FindObjectsOfType<UIPartActionWindow>();
-            //print("Wind count " + partWins.Count());
+            //Log.Info("Wind count " + partWins.Count());
             foreach (UIPartActionWindow partWin in partWins)
             {
                 partWin.displayDirty = true;
