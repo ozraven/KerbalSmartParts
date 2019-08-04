@@ -23,13 +23,13 @@ namespace Lib
         private double triggerTime = 0;
 
         // Delay in seconds. Used for precise measurement
-        [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Seconds", guiFormat = "F2", guiUnits = "sec"),
-            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 120f, incrementLarge = 20f, incrementSmall = 1f, incrementSlide = .05f)]
+        [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Seconds", guiFormat = "F1"),
+            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 120f, incrementLarge = 20f, incrementSmall = 1f, incrementSlide = .05f, sigFigs = 1)]
         public float triggerDelaySeconds = 0;
 
         // Delay in minutes. Used for longer term measurement
-        [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Minutes", guiFormat = "F2", guiUnits = "min"),
-            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 360f, incrementLarge = 60f, incrementSmall = 5f, incrementSlide = .25f)]
+        [KSPField(isPersistant = true, guiActiveEditor = false, guiActive = false, guiName = "Minutes", guiFormat = "F2"),
+            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 360f, incrementLarge = 60f, incrementSmall = 5f, incrementSlide = .25f, sigFigs = 2)]
         public float triggerDelayMinutes = 0;
 
         [KSPField(isPersistant = true, guiActive = true, guiName = "Remaining Time", guiFormat = "F2")]
