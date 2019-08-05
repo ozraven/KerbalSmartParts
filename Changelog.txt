@@ -212,3 +212,6 @@ Taken over by LinuxGurugamer here
 1.9.13.7
 	Fixed speedometer to remember the new max speed setting
 	Fixed the SmartSRB to show action groups properly when AGX is not installed
+
+1.9.13.8
+	Changed timer display to show one decimal place for seconds and two decimal places for minutes
