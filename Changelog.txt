@@ -215,3 +215,6 @@ Taken over by LinuxGurugamer here
 
 1.9.13.8
 	Changed timer display to show one decimal place for seconds and two decimal places for minutes
+
+1.9.13.9
+	Shortened text on the Comm-Pro to avoid wrapping
