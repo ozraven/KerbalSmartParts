@@ -218,3 +218,5 @@ Taken over by LinuxGurugamer here
 
 1.9.13.9
 	Shortened text on the Comm-Pro to avoid wrapping
+	Thanks to github user @jberkman for this
+		Fixed punction on SmartSRB, fixed  it's to its
