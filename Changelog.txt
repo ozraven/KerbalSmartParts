@@ -1,4 +1,6 @@
-﻿v0.1.0 Initial release 
+﻿ChangeLog
+
+v0.1.0 Initial release 
 v0.2.0 Trigger improvements 
 		* Heading control over radio 
 		* Improved altimeter device (Thanks to Firov) 
@@ -219,4 +221,9 @@ Taken over by LinuxGurugamer here
 1.9.13.9
 	Shortened text on the Comm-Pro to avoid wrapping
 	Thanks to github user @jberkman for this
-		Fixed punction on SmartSRB, fixed  it's to its
+		Fixed punction on SmartSRB, fixed  "it's" to "its"
+
+1.9.14
+	Added InstallChecker
+	Updated assemblyVersion.tt
+	Updated for KSP 1.8
