@@ -27,13 +27,13 @@
 	int i2 = 0;
 	string s;
 
-	//string currentDirectory = Path.GetDirectoryName(Host.TemplateFile);
-	//string versionfile =  Path.Combine(currentDirectory, "SmartParts.version");
+	// For Visual Studio / MSBuild Build-Time Template Resolution
+	string RootDirectory = System.IO.Path.GetDirectoryName(Host.TemplateFile) + @"\..\";
 
 	//
-	// Update the following with the complete path to the .version file
+	// Update the following with the name of the .version file which is in the root directory
 	//
-	string versionfile =  @"D:\Users\jbb\github\KerbalSmartParts\SmartParts.version";
+	string versionfile = RootDirectory + "SmartParts.version";
 
 	if (!File.Exists(versionfile))
 	{

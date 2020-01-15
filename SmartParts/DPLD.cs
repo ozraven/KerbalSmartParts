@@ -15,7 +15,8 @@ namespace Lib
 
 
         [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Trigger on"),
-            UI_ChooseOption(options = new string[] { "KSC loss", "Total Comm Loss", "Network Initialized" })]
+            UI_ChooseOption(options = new string[] { "KSC loss", "Total Loss", "Initialized" })]
+        //UI_ChooseOption(options = new string[] { "KSC loss", "Total Comm Loss", "Network Initialized" })]
         public string actionMode = "KSC loss";
 
 
