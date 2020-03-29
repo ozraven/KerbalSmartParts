@@ -25,7 +25,7 @@ namespace Lib
             PREFIX = t + ": ";
         }
 
-        public static LEVEL level = LEVEL.INFO;
+        public static LEVEL level = LEVEL.WARNING;
 
 
 
