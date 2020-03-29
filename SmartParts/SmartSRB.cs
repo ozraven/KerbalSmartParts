@@ -1,89 +1,60 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-using KSP.IO;
+
 
 namespace Lib
 {
-    public class SmartOrbit : SmartSensorModuleBase
+    class SmartSRB : SmartSensorModuleBase
     {
+        [KSPField(isPersistant = true, guiActive = true, guiName = "SRB TWR %", guiFormat = "F0", guiUnits = "%"),
+        UI_FloatEdit(scene = UI_Scene.All, minValue = 100f, maxValue = 150f, incrementSlide = 1f)]
+        public float StagePercentageMass = 0;
 
-        #region Fields
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Trigger on Flameout"), UI_Toggle()]
+        public bool triggerOnFlameout = true;
 
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Element"),
-            UI_ChooseOption(options = new string[] { "Apoapsis", "Periapsis" })]
-        public string element = "Apoapsis";
+        [KSPField(isPersistant = false, guiActive = true, guiName = "SRB TWR", guiFormat = "F2")]
+        private double displayTWR = 0;
 
-        [KSPField(isPersistant = false, guiActive = true, guiName = "Altitude", guiFormat = "N3", guiUnits = "km")]
-        private double displayAlt = 0;
-
-        [KSPField(isPersistant = true, guiActive = true, guiName = "Kilometers", guiFormat = "F0", guiUnits = "km"),
-            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 1000f, incrementLarge = 100f, incrementSmall = 25f, incrementSlide = 1f)]
-        public float kilometerHeight = 0;
-
-        [KSPField(isPersistant = true, guiActive = true, guiName = "Meters", guiFormat = "F0", guiUnits = "m"),
-            UI_FloatEdit(scene = UI_Scene.All, minValue = 0f, maxValue = 1000f, incrementLarge = 100f, incrementSmall = 25f, incrementSlide = 1f)]
-        public float meterHeight = 0;
-
-        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = false, guiName = "Trigger on"),
-            UI_ChooseOption(options = new string[] { "All", "Increasing", "Decreasing" })]
-        public string direction = "All";
-
-
-        #endregion
-
-
-        #region Events
-        [KSPAction("Activate Detection")]
-        public void doActivateAG(KSPActionParam param)
-        {
-            isArmed = true;
-        }
-
-        [KSPAction("Deactivate Detection")]
-        public void doDeActivateAG(KSPActionParam param)
-        {
-            isArmed = false;
-        }
-
-        #endregion
-
+        [KSPField(guiActive = false, guiName = "Fire next update")]
+        private Boolean fireNextupdate = false;
 
         #region Variables
+        ModuleEngines engineModule;
 
-        private double alt = double.NaN;
-        private double currentWindow = 0;
-        private Boolean increasing = false;
-        private Boolean fireNextupdate = false;
+        double maxTWR = 0;
+        bool checkParentType = false;
+        bool wasArmed = false;
+        bool isRunning = false;
         private string groupLastUpdate = "0"; //AGX: What was our selected group last update frame? Top slider.
 
         #endregion
-
 
         #region Overrides
 
         public override void OnStart(StartState state)
         {
-            Log.setTitle("SmartOrbit");
+            Log.setTitle("SmartSRB");
             Log.Info("Started");
+
+            CheckParentType();
 
             //Initial button layout
             updateButtons();
             //Force activation no matter which stage it's on
             this.part.force_activate();
             updateButtons();
+
+            wasArmed = isArmed;
+
+            Fields["autoReset"].guiActiveEditor = false;
+            Fields["autoReset"].guiActive = false;
+            
             initLight(true, "light-go");
         }
 
+
         public override void OnUpdate()
         {
-            //Check to see if the device has been rearmed, if so, deactivate the lights
-            if (isArmed && illuminated)
-            {
-                lightsOff();
-            }
             //In order for physics to take effect on jettisoned parts, the staging event has to be fired from OnUpdate
             if (fireNextupdate)
             {
@@ -98,101 +69,126 @@ namespace Lib
                 }
                 Helper.fireEvent(this.part, groupToFire, (int)agxGroupNum);
                 fireNextupdate = false;
+                isArmed = false;
+                wasArmed = false;
+                maxTWR = 0; // prevents triggering right away if rearmed
+                lightsOn();
             }
-        }
 
-        public override void OnFixedUpdate()
-        {
-            updateAltitude();
 
+            if (checkParentType)
+                CheckParentType(); // unreachable?
+
+            double twr = GetTWR();
+            displayTWR = twr;
+           
             if (isArmed)
             {
-                //We're increasing. Trigger at or above target height
-                if (direction != "Decreasing" && increasing && Math.Abs((alt - currentWindow) - (kilometerHeight * 1000 + meterHeight)) < currentWindow)
+                if (maxTWR > 0 && twr >= 0 && twr < (StagePercentageMass / 100) && twr < maxTWR)
                 {
-                    //This flag is checked for in OnUpdate to trigger staging
+                    Log.Info("fireNextupdate maxTWR: " + maxTWR.ToString("F2") + ", twr: " + twr.ToString("F2"));
                     fireNextupdate = true;
-                    lightsOn();
+                    //Helper.fireEvent(this.part, 0, (int)0);
+                }
+                else if (maxTWR > 0 && twr < 0) // will get here if engine flames out with triggerOnFlameout = false
+                {
                     isArmed = false;
                 }
-                //We're decreasing. Trigger at or below target height
-                else if (direction != "Increasing" && !increasing && Math.Abs((alt + currentWindow) - (kilometerHeight * 1000 + meterHeight)) < currentWindow)
-                {
-                    //This flag is checked for in OnUpdate to trigger staging
-                    fireNextupdate = true;
-                    lightsOn();
-                    isArmed = false;
-                }
+                maxTWR = Math.Max(maxTWR, twr);
             }
 
-            //If auto reset is enabled, wait for departure from the target window and rearm
-            if (!isArmed & autoReset)
+            if (wasArmed != isArmed) // toggled or flamed out with triggerOnFlameout = false
             {
-                if (increasing && Math.Abs((alt - currentWindow) - (kilometerHeight * 1000 + meterHeight)) > currentWindow)
-                {
-                    isArmed = true;
-                }
-                else if (!increasing && Math.Abs((alt + currentWindow) - (kilometerHeight * 1000 + meterHeight)) > currentWindow)
-                {
-                    isArmed = true;
-                }
+                wasArmed = isArmed;
+                maxTWR = 0;
             }
+            if (isArmed && illuminated)
+                lightsOff();
         }
-        public void Update() //AGX: The OnUpdate above only seems to run in flight mode, Update() here runs in all scenes
-        {
-            if (agxGroupType == "1" & groupLastUpdate != "1" || agxGroupType != "1" & groupLastUpdate == "1") //AGX: Monitor group to see if we need to refresh window
-            {
-                updateButtons();
-                refreshPartWindow();
-                if (agxGroupType == "1")
-                {
-                    groupLastUpdate = "1";
-                }
-                else
-                {
-                    groupLastUpdate = "0";
-                }
-            }
-        }
-
-        private void refreshPartWindow() //AGX: Refresh right-click part window to show/hide Groups slider
-        {
-            UIPartActionWindow[] partWins = FindObjectsOfType<UIPartActionWindow>();
-            //Log.Info("Wind count " + partWins.Count());
-            foreach (UIPartActionWindow partWin in partWins)
-            {
-                partWin.displayDirty = true;
-            }
-        }
-
         #endregion
 
-
-        #region Methods
-
-        private void updateAltitude()
+        public new void Awake()
         {
-            double lastAlt = alt;
-
-            if (element == "Apoapsis")
+            base.Awake();
+            Log.Info("SmartSRB.Awake");
+            GameEvents.onEditorPartPlaced.Add(OnEditorPartPlaced);
+        }
+  
+        void OnEditorPartPlaced(Part p)
+        {
+            if (this.part.parent == null)
             {
-                alt = vessel.orbit.ApA;
+                engineModule = null;
+                checkParentType = true;
+            }
+            else
+                CheckParentType();
+        }
+
+        bool FindEngine()
+        {
+            engineModule = null;
+            Part p = this.part.parent;
+            if (p != null)
+            {
+                foreach (ModuleEngines engine in p.FindModulesImplementing<ModuleEngines>())
+                {
+                    if (engine.throttleLocked)
+                    {
+                        engineModule = engine;
+                        break;
+                    }
+                }
+            }
+            return engineModule != null;
+        }
+
+        void CheckParentType()
+        {
+            Log.Info("SmartSRB.CheckParentType");
+            checkParentType = false;
+            
+            if (FindEngine())
+            {
+                Fields["isArmed"].guiActiveEditor = true;
+                Fields["isArmed"].guiActive = true;
             }
             else
             {
-                alt = vessel.orbit.PeA;
+                ScreenMessages.PostScreenMessage("SmartSRB only works on SRBs", 5f, ScreenMessageStyle.UPPER_CENTER);
+                Fields["isArmed"].guiActiveEditor = false;
+                Fields["isArmed"].guiActive = false;
             }
+        }
 
-            displayAlt = alt / 1000;
+        void Destroy()
+        {
+            GameEvents.onEditorPartPlaced.Remove(OnEditorPartPlaced);
+        }
 
-            if (double.IsNaN(lastAlt)) // First pass
-                lastAlt = alt;
+        public double GetTWR()
+        {
+            double twr = -1;
+            if (engineModule != null)
+            {
+                double thrust = engineModule.GetCurrentThrust();
+                if (thrust > 0)
+                {
+                    isRunning = true;
+                    Part p = engineModule.part;
+                    double partTotalMass = p.mass + p.GetModuleMass(p.mass) + p.GetResourceMass();
+                    //double gravHeight = vessel.altitude + vessel.mainBody.Radius; //gravity force at this altitude (not in m/s^2)
+                    //double gravForce = vessel.mainBody.gMagnitudeAtCenter / Math.Pow(gravHeight, 2); //accel down due to gravity in m/s^2
 
-            //Determine if the vessel is ascending or descending
-            increasing = lastAlt < alt;
-
-            //Rate of change
-            currentWindow = Math.Abs(lastAlt - alt);
+                    twr = thrust / (partTotalMass * vessel.graviticAcceleration.magnitude);
+                }
+                else if (triggerOnFlameout && isRunning) // engineModule.flameout not always set
+                {
+                    twr = 0;
+                }
+                isRunning = thrust > 0;
+            }
+            return twr;
         }
 
         private void updateButtons()
@@ -230,14 +226,30 @@ namespace Lib
                 Fields["agxGroupNum"].guiActive = false;
             }
         }
-
-        private void onGUI()
+        private void refreshPartWindow() //AGX: Refresh right-click part window to show/hide Groups slider
         {
-            //Update buttons
-            updateButtons();
+            UIPartActionWindow[] partWins = FindObjectsOfType<UIPartActionWindow>();
+            //Log.Info("Wind count " + partWins.Count());
+            foreach (UIPartActionWindow partWin in partWins)
+            {
+                partWin.displayDirty = true;
+            }
         }
-
-        #endregion
+        public void Update() //AGX: The OnUpdate above only seems to run in flight mode, Update() here runs in all scenes
+        {
+            if (agxGroupType == "1" & groupLastUpdate != "1" || agxGroupType != "1" & groupLastUpdate == "1") //AGX: Monitor group to see if we need to refresh window
+            {
+                updateButtons();
+                refreshPartWindow();
+                if (agxGroupType == "1")
+                {
+                    groupLastUpdate = "1";
+                }
+                else
+                {
+                    groupLastUpdate = "0";
+                }
+            }
+        }
     }
 }
-
