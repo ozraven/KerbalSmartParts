@@ -16,7 +16,7 @@ namespace Lib
         ModuleEngines engineModule;
         ModuleEnginesFX engineModuleFX;
 
-        private static Log Log = new Log();
+        //private static Log Log = new Log();
         bool operational = false;
         double maxThrust = 0;
         bool checkParentType = false;
