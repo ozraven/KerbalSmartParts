@@ -49,6 +49,7 @@
     </Compile>
     <Compile Include="DPLD.cs" />
     <Compile Include="Log.cs" />
+    <Compile Include="SmartOrbit.cs" />
     <Compile Include="SmartSensorModule.cs" />
     <Compile Include="SmartSRB.cs" />
     <Compile Include="Speedometer.cs" />
