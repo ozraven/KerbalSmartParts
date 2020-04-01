@@ -47,6 +47,7 @@ namespace Lib
                     Log.Info("SmartSRB not available due to PartTech not being available");
 
                 enabled = false;
+                isEnabled = false;
                 updateButtons();
                 return;
             }
@@ -116,7 +117,7 @@ namespace Lib
 
         void onEngineActiveChange(ModuleEngines me)
         {
-            if (me.part == this && !isArmed)
+            if (enabled && me.part == this && !isArmed)
             {
                 isArmed = true;
                 wasArmed = isArmed;
