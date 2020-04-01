@@ -240,4 +240,5 @@ Taken over by LinuxGurugamer here
 			Lower logging level.
 
 
-		
+1.9.16
+	Added optional EmbeddedSmartSRB module, use PatchManager to enable it

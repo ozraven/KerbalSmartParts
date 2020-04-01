@@ -1,9 +1,10 @@
 using System;
-
+using System.Collections;
+using UnityEngine;
 
 namespace Lib
 {
-    class SmartSRB : SmartSensorModuleBase
+    class EmbeddedSmartSRB : SmartSensorModuleBase
     {
         [KSPField(isPersistant = true, guiActive = true, guiName = "SRB TWR %", guiFormat = "F0", guiUnits = "%"),
         UI_FloatEdit(scene = UI_Scene.All, minValue = 100f, maxValue = 150f, incrementSlide = 1f)]
@@ -22,43 +23,58 @@ namespace Lib
         ModuleEngines engineModule;
 
         double maxTWR = 0;
-        bool checkParentType = false;
         bool wasArmed = false;
         bool isRunning = false;
         private string groupLastUpdate = "0"; //AGX: What was our selected group last update frame? Top slider.
 
         #endregion
 
-        #region Overrides
+
+        //private bool enabled = true;
+        public new void Awake()
+        {
+            Log.setTitle("SmartSRB");
+
+            base.Awake();
+            var ap = PartLoader.getPartInfoByName("km_smart_srb");
+
+            if (ap != null && !ResearchAndDevelopment.PartModelPurchased(ap) || !ResearchAndDevelopment.PartTechAvailable(ap))
+            {
+                if (!ResearchAndDevelopment.PartModelPurchased(ap))
+                    Log.Info("SmartSRB not available due to PartModel not being purchased");
+
+                if (!ResearchAndDevelopment.PartTechAvailable(ap))
+                    Log.Info("SmartSRB not available due to PartTech not being available");
+
+                enabled = false;
+                updateButtons();
+                return;
+            }
+            GameEvents.onEngineActiveChange.Add(onEngineActiveChange);
+            //StartCoroutine(GuiUpdate());
+        }
 
         public override void OnStart(StartState state)
         {
-            Log.setTitle("SmartSRB");
-            Log.Info("Started");
-
-            CheckParentType();
+            if (!enabled)
+                return;
 
             //Initial button layout
             updateButtons();
-            //Force activation no matter which stage it's on
-            this.part.force_activate();
-            updateButtons();
 
             wasArmed = isArmed;
-
-            Fields["autoReset"].guiActiveEditor = false;
-            Fields["autoReset"].guiActive = false;
-            
-            initLight(true, "light-go");
+            FindEngine();
         }
 
 
         public override void OnUpdate()
         {
+            if (FlightGlobals.ActiveVessel.situation == Vessel.Situations.PRELAUNCH)
+                return;
             //In order for physics to take effect on jettisoned parts, the staging event has to be fired from OnUpdate
             if (fireNextupdate)
             {
-                int groupToFire = 0; //AGX: need to send correct group
+                int groupToFire = 0;
                 if (AGXInterface.AGExtInstalled())
                 {
                     groupToFire = int.Parse(agxGroupType);
@@ -72,21 +88,15 @@ namespace Lib
                 isArmed = false;
                 wasArmed = false;
                 maxTWR = 0; // prevents triggering right away if rearmed
-                lightsOn();
             }
-
-
-            if (checkParentType)
-                CheckParentType(); // unreachable?
 
             double twr = GetTWR();
             displayTWR = twr;
-           
+
             if (isArmed)
             {
                 if (maxTWR > 0 && twr >= 0 && twr <= (StagePercentageMass / 100) && twr < maxTWR)
                 {
-                    Log.Info("fireNextupdate maxTWR: " + maxTWR.ToString("F2") + ", twr: " + twr.ToString("F2"));
                     fireNextupdate = true;
                     //Helper.fireEvent(this.part, 0, (int)0);
                 }
@@ -102,35 +112,23 @@ namespace Lib
                 wasArmed = isArmed;
                 maxTWR = 0;
             }
-            if (isArmed && illuminated)
-                lightsOff();
         }
-        #endregion
 
-        public new void Awake()
+        void onEngineActiveChange(ModuleEngines me)
         {
-            base.Awake();
-            GameEvents.onEditorPartPlaced.Add(OnEditorPartPlaced);
-        }
-  
-        void OnEditorPartPlaced(Part p)
-        {
-            if (this.part.parent == null)
+            if (me.part == this && !isArmed)
             {
-                engineModule = null;
-                checkParentType = true;
+                isArmed = true;
+                wasArmed = isArmed;
+                maxTWR = 1.1f;
+                GameEvents.onEngineActiveChange.Remove(onEngineActiveChange);
             }
-            else
-                CheckParentType();
         }
-
         bool FindEngine()
         {
             engineModule = null;
-            Part p = this.part.parent;
-            if (p != null)
             {
-                foreach (ModuleEngines engine in p.FindModulesImplementing<ModuleEngines>())
+                foreach (ModuleEngines engine in this.part.FindModulesImplementing<ModuleEngines>())
                 {
                     if (engine.throttleLocked)
                     {
@@ -139,30 +137,14 @@ namespace Lib
                     }
                 }
             }
+            if (engineModule == null)
+                Log.Error("FindEngine:  EngineModule not found");
             return engineModule != null;
-        }
-
-        void CheckParentType()
-        {
-            Log.Info("SmartSRB.CheckParentType");
-            checkParentType = false;
-            
-            if (FindEngine())
-            {
-                Fields["isArmed"].guiActiveEditor = true;
-                Fields["isArmed"].guiActive = true;
-            }
-            else
-            {
-                ScreenMessages.PostScreenMessage("SmartSRB only works on SRBs", 5f, ScreenMessageStyle.UPPER_CENTER);
-                Fields["isArmed"].guiActiveEditor = false;
-                Fields["isArmed"].guiActive = false;
-            }
         }
 
         void Destroy()
         {
-            GameEvents.onEditorPartPlaced.Remove(OnEditorPartPlaced);
+            GameEvents.onEngineActiveChange.Remove(onEngineActiveChange);
         }
 
         public double GetTWR()
@@ -192,54 +174,73 @@ namespace Lib
 
         private void updateButtons()
         {
+
             //Change to AGX buttons if AGX installed
-            if (AGXInterface.AGExtInstalled())
+            Fields["isArmed"].guiName = "Embedded SmartSRB Active:";
+
+            Fields["StagePercentageMass"].guiActive = Fields["StagePercentageMass"].guiActiveEditor = isArmed;
+
+            if (!isArmed)
             {
                 Fields["group"].guiActiveEditor = false;
                 Fields["group"].guiActive = false;
-                Fields["agxGroupType"].guiActiveEditor = true;
-                Fields["agxGroupType"].guiActive = true;
-                //Fields["agxGroupNum"].guiActiveEditor = true;
-                //Fields["agxGroupNum"].guiActive = true;
-                if (agxGroupType == "1") //only show groups select slider when selecting action group
-                {
-                    Fields["agxGroupNum"].guiActiveEditor = true;
-                    Fields["agxGroupNum"].guiActive = true;
-                    //Fields["agxGroupNum"].guiName = "Group:";
-                }
-                else
-                {
-                    Fields["agxGroupNum"].guiActiveEditor = false;
-                    Fields["agxGroupNum"].guiActive = false;
-                    //Fields["agxGroupNum"].guiName = "N/A";
-                    //agxGroupNum = 1;
-                }
-            }
-            else //AGX not installed, leave at default
-            {
-                Fields["group"].guiActiveEditor = true;
-                Fields["group"].guiActive = true;
                 Fields["agxGroupType"].guiActiveEditor = false;
                 Fields["agxGroupType"].guiActive = false;
                 Fields["agxGroupNum"].guiActiveEditor = false;
                 Fields["agxGroupNum"].guiActive = false;
+
+            }
+            else
+            {
+                if (AGXInterface.AGExtInstalled())
+                {
+                    Fields["group"].guiActiveEditor = false;
+                    Fields["group"].guiActive = false;
+                    Fields["agxGroupType"].guiActiveEditor = true;
+                    Fields["agxGroupType"].guiActive = true;
+                    if (agxGroupType == "1") //only show groups select slider when selecting action group
+                    {
+                        Fields["agxGroupNum"].guiActiveEditor = true;
+                        Fields["agxGroupNum"].guiActive = true;
+                    }
+                    else
+                    {
+                        Fields["agxGroupNum"].guiActiveEditor = false;
+                        Fields["agxGroupNum"].guiActive = false;
+                    }
+                }
+                else //AGX not installed, leave at default
+                {
+                    Fields["group"].guiActiveEditor = true;
+                    Fields["group"].guiActive = true;
+                    Fields["agxGroupType"].guiActiveEditor = false;
+                    Fields["agxGroupType"].guiActive = false;
+                    Fields["agxGroupNum"].guiActiveEditor = false;
+                    Fields["agxGroupNum"].guiActive = false;
+                }
             }
         }
         private void refreshPartWindow() //AGX: Refresh right-click part window to show/hide Groups slider
         {
             UIPartActionWindow[] partWins = FindObjectsOfType<UIPartActionWindow>();
-            //Log.Info("Wind count " + partWins.Count());
             foreach (UIPartActionWindow partWin in partWins)
             {
                 partWin.displayDirty = true;
             }
         }
+
         public void Update() //AGX: The OnUpdate above only seems to run in flight mode, Update() here runs in all scenes
         {
+            if (!enabled)
+                return;
+
+
+            updateButtons();
+
             if (agxGroupType == "1" & groupLastUpdate != "1" || agxGroupType != "1" & groupLastUpdate == "1") //AGX: Monitor group to see if we need to refresh window
             {
-                updateButtons();
                 refreshPartWindow();
+
                 if (agxGroupType == "1")
                 {
                     groupLastUpdate = "1";
