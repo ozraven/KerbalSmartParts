@@ -3,7 +3,7 @@ using System;
 
 namespace Lib
 {
-    class SmartSRB : SmartSensorModuleBase
+    class SmartSRBBase : SmartSensorModuleBase
     {
         [KSPField(isPersistant = true, guiActive = true, guiName = "SRB TWR %", guiFormat = "F0", guiUnits = "%"),
         UI_FloatEdit(scene = UI_Scene.All, minValue = 100f, maxValue = 150f, incrementSlide = 1f)]
@@ -19,10 +19,10 @@ namespace Lib
         private Boolean fireNextupdate = false;
 
         #region Variables
-        ModuleEngines engineModule;
+        protected ModuleEngines engineModule;
 
         double maxTWR = 0;
-        bool checkParentType = false;
+        protected bool checkEngine = false;
         bool wasArmed = false;
         bool isRunning = false;
         private string groupLastUpdate = "0"; //AGX: What was our selected group last update frame? Top slider.
@@ -33,16 +33,15 @@ namespace Lib
 
         public override void OnStart(StartState state)
         {
-            Log.setTitle("SmartSRB");
+            Log.setTitle(this.ClassName);
             Log.Info("Started");
 
-            CheckParentType();
+            CheckEngine();
 
             //Initial button layout
             updateButtons();
             //Force activation no matter which stage it's on
-            this.part.force_activate();
-            updateButtons();
+            //this.part.force_activate();
 
             wasArmed = isArmed;
 
@@ -55,6 +54,8 @@ namespace Lib
 
         public override void OnUpdate()
         {
+            if (!moduleIsEnabled)
+                return;
             //In order for physics to take effect on jettisoned parts, the staging event has to be fired from OnUpdate
             if (fireNextupdate)
             {
@@ -76,8 +77,8 @@ namespace Lib
             }
 
 
-            if (checkParentType)
-                CheckParentType(); // unreachable?
+            if (checkEngine)
+                CheckEngine(); // unreachable?
 
             double twr = GetTWR();
             displayTWR = twr;
@@ -107,27 +108,9 @@ namespace Lib
         }
         #endregion
 
-        public new void Awake()
-        {
-            base.Awake();
-            GameEvents.onEditorPartPlaced.Add(OnEditorPartPlaced);
-        }
-  
-        void OnEditorPartPlaced(Part p)
-        {
-            if (this.part.parent == null)
-            {
-                engineModule = null;
-                checkParentType = true;
-            }
-            else
-                CheckParentType();
-        }
-
-        bool FindEngine()
+        protected bool FindEngine(Part p)
         {
             engineModule = null;
-            Part p = this.part.parent;
             if (p != null)
             {
                 foreach (ModuleEngines engine in p.FindModulesImplementing<ModuleEngines>())
@@ -142,10 +125,15 @@ namespace Lib
             return engineModule != null;
         }
 
-        void CheckParentType()
+        protected virtual bool FindEngine()
         {
-            Log.Info("SmartSRB.CheckParentType");
-            checkParentType = false;
+            return FindEngine(part.parent);
+        }
+
+        protected void CheckEngine()
+        {
+            Log.Info("SmartSRBBase.CheckParentType");
+            checkEngine = false;
             
             if (FindEngine())
             {
@@ -160,10 +148,7 @@ namespace Lib
             }
         }
 
-        void Destroy()
-        {
-            GameEvents.onEditorPartPlaced.Remove(OnEditorPartPlaced);
-        }
+        
 
         public double GetTWR()
         {
@@ -190,8 +175,28 @@ namespace Lib
             return twr;
         }
 
-        private void updateButtons()
+        protected void updateButtons()
         {
+            if (!moduleIsEnabled)
+            {
+                // Hide entire GUI
+                foreach(BaseEvent e in Events)
+                {
+                    e.guiActive = false;
+                    e.guiActiveEditor = false;
+                }
+                foreach (BaseField f in Fields)
+                {
+                    f.guiActive = false;
+                    f.guiActiveEditor = false;
+                }
+                foreach (BaseAction a in Actions)
+                {
+                    a.active = false;
+                }
+                return;
+            }
+
             //Change to AGX buttons if AGX installed
             if (AGXInterface.AGExtInstalled())
             {
@@ -225,7 +230,7 @@ namespace Lib
                 Fields["agxGroupNum"].guiActive = false;
             }
         }
-        private void refreshPartWindow() //AGX: Refresh right-click part window to show/hide Groups slider
+        protected void refreshPartWindow() //AGX: Refresh right-click part window to show/hide Groups slider
         {
             UIPartActionWindow[] partWins = FindObjectsOfType<UIPartActionWindow>();
             //Log.Info("Wind count " + partWins.Count());
@@ -234,8 +239,10 @@ namespace Lib
                 partWin.displayDirty = true;
             }
         }
-        public void Update() //AGX: The OnUpdate above only seems to run in flight mode, Update() here runs in all scenes
+        protected void Update() //AGX: The OnUpdate above only seems to run in flight mode, Update() here runs in all scenes
         {
+            if (!moduleIsEnabled)
+                return;
             if (agxGroupType == "1" & groupLastUpdate != "1" || agxGroupType != "1" & groupLastUpdate == "1") //AGX: Monitor group to see if we need to refresh window
             {
                 updateButtons();
@@ -249,6 +256,115 @@ namespace Lib
                     groupLastUpdate = "0";
                 }
             }
+        }
+    }
+
+    class SmartSRB : SmartSRBBase
+    {
+
+        public new void Awake()
+        {
+            base.Awake();
+            GameEvents.onEditorPartPlaced.Add(OnEditorPartPlaced);
+        }
+
+        public void OnEditorPartPlaced(Part p)
+        {
+            if (this.part.parent == null)
+            {
+                engineModule = null;
+                checkEngine = true;
+            }
+            else
+                CheckEngine();
+        }
+
+        void Destroy()
+        {
+            GameEvents.onEditorPartPlaced.Remove(OnEditorPartPlaced);
+        }
+    }
+
+    class EmbeddedSmartSRB : SmartSRBBase
+    {
+        [KSPField(isPersistant = false)]
+        public string guiGroup = "EmbededSmartSRB";
+        [KSPField(isPersistant = false)]
+        public string guiGroupDisplayName = "Smart SRB";
+
+        [KSPField(isPersistant = true)]
+        public bool isResearched = false;
+
+        [KSPField(isPersistant = false)]
+        public string researchPartName = "km_smart_srb";
+
+        public override void OnStart(StartState state)
+        {
+            base.OnStart(state);
+
+            // Group our stuff in the engine's menu
+            foreach (BaseField f in Fields)
+            {
+                f.group.name = guiGroup;
+                f.group.displayName = guiGroupDisplayName;
+            }
+            foreach (BaseEvent e in Events)
+            {
+                e.group.name = guiGroup;
+                e.group.displayName = guiGroupDisplayName;
+            }
+
+            if (state == StartState.Editor) // This is an upgrade, so don't give it to an already in flight vessel that doesn't have it
+            {
+                researchPartName = researchPartName.Replace("_", ".");
+                var ap = PartLoader.getPartInfoByName(researchPartName);
+
+                if (ap == null)
+                {
+                    Log.Error("researchPartName = " + researchPartName + "; Part not found.");
+                    // set isResearched to false here?
+                }
+                else
+                {
+                    isResearched = ResearchAndDevelopment.PartModelPurchased(ap) && ResearchAndDevelopment.PartTechAvailable(ap);
+                    if (!isResearched)
+                    {
+                        if (!ResearchAndDevelopment.PartModelPurchased(ap))
+                            Log.Info("SmartSRB not available due to PartModel not being purchased");
+
+                        if (!ResearchAndDevelopment.PartTechAvailable(ap))
+                            Log.Info("SmartSRB not available due to PartTech not being available");
+
+                    }
+                }
+                
+            }
+            moduleIsEnabled = isResearched;
+            updateButtons();
+            
+            //GameEvents.onEngineActiveChange.Add(onEngineActiveChange);
+            //StartCoroutine(GuiUpdate());
+        }
+
+/*
+        void onEngineActiveChange(ModuleEngines me)
+        {
+            if (enabled && me.part == this && !isArmed)
+            {
+                isArmed = true;
+                wasArmed = isArmed;
+                maxTWR = 1.1f;
+                GameEvents.onEngineActiveChange.Remove(onEngineActiveChange);
+            }
+        }
+*/
+
+        protected override bool FindEngine()
+        {
+            bool found = FindEngine(part);
+            if (!found)
+                Log.Error("FindEngine:  EngineModule not found on part");
+            return found;
         }
     }
 }
