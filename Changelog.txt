@@ -242,3 +242,9 @@ Taken over by LinuxGurugamer here
 
 1.9.16
 	Added optional EmbeddedSmartSRB module, use PatchManager to enable it
+	Thanks to user @jsolson for these changes:
+		Cleaned up and merged code for the SmartSRB and EmbeddedSmartSRB, now 
+		SmartSRB and EmbeddedSmartSRB are in a single file.
+	Use a common base class for both.
+	Added check for enabled to the onEngineActiveChange
+    Added setting isEnabled to false if not available in the Awake()
