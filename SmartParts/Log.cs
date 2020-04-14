@@ -52,7 +52,7 @@ namespace Lib
 
         public bool IsLogable(LEVEL level)
         {
-            return Log.level <= level;
+            return Log.level >= level;
         }
 
         public void Trace(String msg)
