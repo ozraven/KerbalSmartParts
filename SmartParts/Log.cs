@@ -25,7 +25,7 @@ namespace Lib
             PREFIX = t + ": ";
         }
 
-        public static LEVEL level = LEVEL.INFO;
+        public static LEVEL level = LEVEL.WARNING;
 
 
 
@@ -52,7 +52,7 @@ namespace Lib
 
         public bool IsLogable(LEVEL level)
         {
-            return Log.level <= level;
+            return Log.level >= level;
         }
 
         public void Trace(String msg)

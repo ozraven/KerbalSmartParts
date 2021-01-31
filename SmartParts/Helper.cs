@@ -67,7 +67,7 @@ namespace Lib
 
         #region Staging/AG Methods
 
-        public static void fireEvent(Part p, int eventID, int AGXgroup) { //AGXgroup is only used if Action Groups Extended is installed, ignore it otherwiseDebug.Log("fire " + p.name + eventID + "||" + AGXgroup);
+        public static void fireEvent(Part p, int eventID, int AGXgroup = -1) { //AGXgroup is only used if Action Groups Extended is installed, ignore it otherwiseDebug.Log("fire " + p.name + eventID + "||" + AGXgroup);
             if (p == null)
                 return;
             if (eventID == 0) {
@@ -75,7 +75,7 @@ namespace Lib
                 fireNextNonEmptyStage(p.vessel);
                 return;
             }
-            else if(AGXInterface.AGExtInstalled() && eventID == 1) 
+            else if(AGXInterface.AGExtInstalled() && eventID == 1 && AGXgroup != -1) 
             {
                 AGXInterface.AGX2VslToggleGroup(p.vessel.rootPart.flightID, AGXgroup); //call to agx to activate group
             }

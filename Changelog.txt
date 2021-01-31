@@ -227,3 +227,24 @@ Taken over by LinuxGurugamer here
 	Added InstallChecker
 	Updated assemblyVersion.tt
 	Updated for KSP 1.8
+
+1.9.15
+	Thanks to user @jsolson for these changes
+		Add SmartOrbit part. Works like the altitude part, but for Ap/Pe.
+		Smart SRB:
+			Simplify code.
+			Support the Armed/Disarmed toggle.
+			Add an indicator light when triggered.
+			Detect flameouts. Previously if the TWR never dropped below the target before flameout the part would not trigger.
+			Added Trigger on Flameout toggle if the old behavior is desired.
+			Lower logging level.
+
+
+1.9.16
+	Added optional EmbeddedSmartSRB module, use PatchManager to enable it
+	Thanks to user @jsolson for these changes:
+		Cleaned up and merged code for the SmartSRB and EmbeddedSmartSRB, now 
+		SmartSRB and EmbeddedSmartSRB are in a single file.
+	Use a common base class for both.
+	Added check for enabled to the onEngineActiveChange
+    Added setting isEnabled to false if not available in the Awake()

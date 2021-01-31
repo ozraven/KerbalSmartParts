@@ -1,25 +1,30 @@
-﻿using System;
+using System;
 
 
 namespace Lib
 {
-    class SmartSRB : SmartSensorModuleBase
+    class SmartSRBBase : SmartSensorModuleBase
     {
         [KSPField(isPersistant = true, guiActive = true, guiName = "SRB TWR %", guiFormat = "F0", guiUnits = "%"),
         UI_FloatEdit(scene = UI_Scene.All, minValue = 100f, maxValue = 150f, incrementSlide = 1f)]
-        public float StagePercentageMass = 0;
+        public float StagePercentageMass = 100;
+
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Trigger on Flameout"), UI_Toggle()]
+        public bool triggerOnFlameout = true;
+
+        [KSPField(isPersistant = false, guiActive = true, guiName = "SRB TWR", guiFormat = "F2")]
+        private double displayTWR = 0;
 
         [KSPField(guiActive = false, guiName = "Fire next update")]
         private Boolean fireNextupdate = false;
 
         #region Variables
-        ModuleEngines engineModule;
-        ModuleEnginesFX engineModuleFX;
+        protected ModuleEngines engineModule;
 
-        private static Log Log = new Log();
-        bool operational = false;
-        double maxThrust = 0;
-        bool checkParentType = false;
+        double maxTWR = 0;
+        protected bool checkEngine = false;
+        bool wasArmed = false;
+        bool isRunning = false;
         private string groupLastUpdate = "0"; //AGX: What was our selected group last update frame? Top slider.
 
         #endregion
@@ -28,17 +33,29 @@ namespace Lib
 
         public override void OnStart(StartState state)
         {
+            Log.setTitle(this.ClassName);
+            Log.Info("Started");
+
+            CheckEngine();
+
             //Initial button layout
             updateButtons();
             //Force activation no matter which stage it's on
-            this.part.force_activate();
-            Log.Info("SmartSRB Started");
-            updateButtons();
+            //this.part.force_activate();
+
+            wasArmed = isArmed;
+
+            Fields["autoReset"].guiActiveEditor = false;
+            Fields["autoReset"].guiActive = false;
+            
+            initLight(true, "light-go");
         }
 
 
         public override void OnUpdate()
         {
+            if (!moduleIsEnabled)
+                return;
             //In order for physics to take effect on jettisoned parts, the staging event has to be fired from OnUpdate
             if (fireNextupdate)
             {
@@ -53,133 +70,133 @@ namespace Lib
                 }
                 Helper.fireEvent(this.part, groupToFire, (int)agxGroupNum);
                 fireNextupdate = false;
+                isArmed = false;
+                wasArmed = false;
+                maxTWR = 0; // prevents triggering right away if rearmed
+                lightsOn();
             }
 
 
-            if (checkParentType)
-                CheckParentType();
-            double ti = GetThrustInfo(this.part.parent, this.vessel.altitude);
-            
-            if (maxThrust > 0 && ti >= 0 && ti < (StagePercentageMass / 100) && ti<maxThrust)
+            if (checkEngine)
+                CheckEngine(); // unreachable?
+
+            double twr = GetTWR();
+            displayTWR = twr;
+           
+            if (isArmed)
             {
-                Log.Info("maxThrust: " + maxThrust.ToString("F2") + ", ti: " + ti.ToString("F2"));
-                fireNextupdate = true;
-                //Helper.fireEvent(this.part, 0, (int)0);
+                if (maxTWR > 0 && twr >= 0 && twr <= (StagePercentageMass / 100) && twr < maxTWR)
+                {
+                    Log.Info("fireNextupdate maxTWR: " + maxTWR.ToString("F2") + ", twr: " + twr.ToString("F2"));
+                    fireNextupdate = true;
+                    //Helper.fireEvent(this.part, 0, (int)0);
+                }
+                else if (maxTWR > 0 && twr < 0) // will get here if engine flames out with triggerOnFlameout = false
+                {
+                    isArmed = false;
+                }
+                maxTWR = Math.Max(maxTWR, twr);
             }
-            maxThrust = Math.Max(maxThrust, ti);
+
+            if (wasArmed != isArmed) // toggled or flamed out with triggerOnFlameout = false
+            {
+                wasArmed = isArmed;
+                maxTWR = 0;
+            }
+            if (isArmed && illuminated)
+                lightsOff();
         }
         #endregion
 
-        public new void Awake()
+        protected bool FindEngine(Part p)
         {
-            base.Awake();
-            Log.Info("SmartSRB.Awake");
-            GameEvents.onEditorPartPlaced.Add(OnEditorPartPlaced);
+            engineModule = null;
+            if (p != null)
+            {
+                foreach (ModuleEngines engine in p.FindModulesImplementing<ModuleEngines>())
+                {
+                    if (engine.throttleLocked)
+                    {
+                        engineModule = engine;
+                        break;
+                    }
+                }
+            }
+            return engineModule != null;
         }
-  
-        void OnEditorPartPlaced(Part p)
+
+        protected virtual bool FindEngine()
         {
-            if (this.part.parent == null)
-                checkParentType = true;
+            return FindEngine(part.parent);
+        }
+
+        protected void CheckEngine()
+        {
+            Log.Info("SmartSRBBase.CheckParentType");
+            checkEngine = false;
+            
+            if (FindEngine())
+            {
+                Fields["isArmed"].guiActiveEditor = true;
+                Fields["isArmed"].guiActive = true;
+            }
             else
-                CheckParentType();
+            {
+                ScreenMessages.PostScreenMessage("SmartSRB only works on SRBs", 5f, ScreenMessageStyle.UPPER_CENTER);
+                Fields["isArmed"].guiActiveEditor = false;
+                Fields["isArmed"].guiActive = false;
+            }
         }
 
-        void CheckParentType()
+        
+
+        public double GetTWR()
         {
-            Log.Info("SmartSRB.CheckParentType");
-            checkParentType = false;
-            var p = this.part.parent;
-          
-            if (p.Modules.Contains("ModuleEngines") || p.Modules.Contains("ModuleEnginesFX")) //is part an engine?
+            double twr = -1;
+            if (engineModule != null)
             {
-                foreach (PartModule partModule in p.Modules) //change from part to partmodules
+                double thrust = engineModule.GetCurrentThrust();
+                if (thrust > 0)
                 {
-                    if (partModule.moduleName == "ModuleEngines") //find partmodule engine on th epart
-                    {
-                        engineModule = partModule as ModuleEngines; 
+                    isRunning = true;
+                    Part p = engineModule.part;
+                    double partTotalMass = p.mass + p.GetModuleMass(p.mass) + p.GetResourceMass();
+                    //double gravHeight = vessel.altitude + vessel.mainBody.Radius; //gravity force at this altitude (not in m/s^2)
+                    //double gravForce = vessel.mainBody.gMagnitudeAtCenter / Math.Pow(gravHeight, 2); //accel down due to gravity in m/s^2
 
-                        if (engineModule.throttleLocked) // only check if this is an srb
-                        {
-                            return;
-                        }
-                    }
-                    else if (partModule.moduleName == "ModuleEnginesFX") //find partmodule engine on th epart
-                    {
-                        engineModuleFX = partModule as ModuleEnginesFX; 
-
-                        if (engineModuleFX.throttleLocked)
-                        {
-                            return;
-                        }
-                    }
+                    twr = thrust / (partTotalMass * vessel.graviticAcceleration.magnitude);
                 }
-            }
-            ScreenMessages.PostScreenMessage("SmartSRB only works on SRBs", 5f, ScreenMessageStyle.UPPER_CENTER);
-        }
-
-        void Destroy()
-        {
-            GameEvents.onEditorPartPlaced.Remove(OnEditorPartPlaced);
-        }
-
-        public double GetThrustInfo(Part part, double altitude)
-        {
-            Vessel activeVessel = FlightGlobals.ActiveVessel;
-            double actualThrustLastFrame = 0;
-            double staticPressure = activeVessel.mainBody.GetPressure(altitude) * PhysicsGlobals.KpaToAtmospheres;
-            double mass = part.mass + part.GetModuleMass(part.mass) + part.GetResourceMass();
-
-            if (part.Modules.Contains("ModuleEngines") || part.Modules.Contains("ModuleEnginesFX")) //is part an engine?
-            {
-                foreach (PartModule partModule in part.Modules) //change from part to partmodules
+                else if (triggerOnFlameout && isRunning) // engineModule.flameout not always set
                 {
-                    if (partModule.moduleName == "ModuleEngines") //find partmodule engine on th epart
-                    {
-                        engineModule = partModule as ModuleEngines; //change from partmodules to moduleengines
-
-                        if (engineModule.throttleLocked) // only check if this is an srb
-                        {
-                            if (engineModule.isOperational)//if throttlelocked is true, this is solid rocket booster. then check engine is operational. if the engine is flamedout, disabled via-right click or not yet activated via stage control, isOperational returns false
-                            {
-                                operational = true;
-                            }
-
-                            actualThrustLastFrame = (float)engineModule.finalThrust; // * (float)offsetMultiplier;
-                        }
-                    }
-                    else if (partModule.moduleName == "ModuleEnginesFX") //find partmodule engine on th epart
-                    {
-                        engineModuleFX = partModule as ModuleEnginesFX; //change from partmodules to moduleengines
-
-                        if (engineModuleFX.throttleLocked)
-                        {
-                            if (engineModuleFX.isOperational)//if throttlelocked is true, this is solid rocket booster. then check engine is operational. if the engine is flamedout, disabled via-right click or not yet activated via stage control, isOperational returns false
-                            {
-                                operational = true;
-                            }
-
-                            actualThrustLastFrame = (float)engineModuleFX.finalThrust;
-                        }
-                    }
-
+                    twr = 0;
                 }
-
+                isRunning = thrust > 0;
             }
-            if (operational)
-            {
-                var gravHeight = (float)this.vessel.altitude + (float)this.vessel.mainBody.Radius; //gravity force at this altitude (not in m/s^2)
-                var gravForce = (float)this.vessel.mainBody.gMagnitudeAtCenter / (float)Math.Pow(gravHeight, 2); //accel down due to gravity in m/s^2
-
-                var twr = actualThrustLastFrame / (gravForce * mass);
-
-                return twr;
-            }
-            return -1;
+            return twr;
         }
 
-        private void updateButtons()
+        protected void updateButtons()
         {
+            if (!moduleIsEnabled)
+            {
+                // Hide entire GUI
+                foreach(BaseEvent e in Events)
+                {
+                    e.guiActive = false;
+                    e.guiActiveEditor = false;
+                }
+                foreach (BaseField f in Fields)
+                {
+                    f.guiActive = false;
+                    f.guiActiveEditor = false;
+                }
+                foreach (BaseAction a in Actions)
+                {
+                    a.active = false;
+                }
+                return;
+            }
+
             //Change to AGX buttons if AGX installed
             if (AGXInterface.AGExtInstalled())
             {
@@ -213,7 +230,7 @@ namespace Lib
                 Fields["agxGroupNum"].guiActive = false;
             }
         }
-        private void refreshPartWindow() //AGX: Refresh right-click part window to show/hide Groups slider
+        protected void refreshPartWindow() //AGX: Refresh right-click part window to show/hide Groups slider
         {
             UIPartActionWindow[] partWins = FindObjectsOfType<UIPartActionWindow>();
             //Log.Info("Wind count " + partWins.Count());
@@ -222,8 +239,10 @@ namespace Lib
                 partWin.displayDirty = true;
             }
         }
-        public void Update() //AGX: The OnUpdate above only seems to run in flight mode, Update() here runs in all scenes
+        protected void Update() //AGX: The OnUpdate above only seems to run in flight mode, Update() here runs in all scenes
         {
+            if (!moduleIsEnabled)
+                return;
             if (agxGroupType == "1" & groupLastUpdate != "1" || agxGroupType != "1" & groupLastUpdate == "1") //AGX: Monitor group to see if we need to refresh window
             {
                 updateButtons();
@@ -237,6 +256,115 @@ namespace Lib
                     groupLastUpdate = "0";
                 }
             }
+        }
+    }
+
+    class SmartSRB : SmartSRBBase
+    {
+
+        public new void Awake()
+        {
+            base.Awake();
+            GameEvents.onEditorPartPlaced.Add(OnEditorPartPlaced);
+        }
+
+        public void OnEditorPartPlaced(Part p)
+        {
+            if (this.part.parent == null)
+            {
+                engineModule = null;
+                checkEngine = true;
+            }
+            else
+                CheckEngine();
+        }
+
+        void Destroy()
+        {
+            GameEvents.onEditorPartPlaced.Remove(OnEditorPartPlaced);
+        }
+    }
+
+    class EmbeddedSmartSRB : SmartSRBBase
+    {
+        [KSPField(isPersistant = false)]
+        public string guiGroup = "EmbededSmartSRB";
+        [KSPField(isPersistant = false)]
+        public string guiGroupDisplayName = "Smart SRB";
+
+        [KSPField(isPersistant = true)]
+        public bool isResearched = false;
+
+        [KSPField(isPersistant = false)]
+        public string researchPartName = "km_smart_srb";
+
+        public override void OnStart(StartState state)
+        {
+            base.OnStart(state);
+
+            // Group our stuff in the engine's menu
+            foreach (BaseField f in Fields)
+            {
+                f.group.name = guiGroup;
+                f.group.displayName = guiGroupDisplayName;
+            }
+            foreach (BaseEvent e in Events)
+            {
+                e.group.name = guiGroup;
+                e.group.displayName = guiGroupDisplayName;
+            }
+
+            if (state == StartState.Editor) // This is an upgrade, so don't give it to an already in flight vessel that doesn't have it
+            {
+                researchPartName = researchPartName.Replace("_", ".");
+                var ap = PartLoader.getPartInfoByName(researchPartName);
+
+                if (ap == null)
+                {
+                    Log.Error("researchPartName = " + researchPartName + "; Part not found.");
+                    // set isResearched to false here?
+                }
+                else
+                {
+                    isResearched = ResearchAndDevelopment.PartModelPurchased(ap) && ResearchAndDevelopment.PartTechAvailable(ap);
+                    if (!isResearched)
+                    {
+                        if (!ResearchAndDevelopment.PartModelPurchased(ap))
+                            Log.Info("SmartSRB not available due to PartModel not being purchased");
+
+                        if (!ResearchAndDevelopment.PartTechAvailable(ap))
+                            Log.Info("SmartSRB not available due to PartTech not being available");
+
+                    }
+                }
+                
+            }
+            moduleIsEnabled = isResearched;
+            updateButtons();
+            
+            //GameEvents.onEngineActiveChange.Add(onEngineActiveChange);
+            //StartCoroutine(GuiUpdate());
+        }
+
+/*
+        void onEngineActiveChange(ModuleEngines me)
+        {
+            if (enabled && me.part == this && !isArmed)
+            {
+                isArmed = true;
+                wasArmed = isArmed;
+                maxTWR = 1.1f;
+                GameEvents.onEngineActiveChange.Remove(onEngineActiveChange);
+            }
+        }
+*/
+
+        protected override bool FindEngine()
+        {
+            bool found = FindEngine(part);
+            if (!found)
+                Log.Error("FindEngine:  EngineModule not found on part");
+            return found;
         }
     }
 }
