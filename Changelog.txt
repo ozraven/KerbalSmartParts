@@ -248,3 +248,6 @@ Taken over by LinuxGurugamer here
 	Use a common base class for both.
 	Added check for enabled to the onEngineActiveChange
     Added setting isEnabled to false if not available in the Awake()
+
+1.9.16.1
+	Fixed prox sensor patch to not add to command pods which also have built-in decouplers
